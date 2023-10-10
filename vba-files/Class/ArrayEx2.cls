@@ -92,7 +92,7 @@ Public Function SetRow(argRow As Long, argArrayEx1 As ArrayEx1)
     Next i
 End Function
 
-Public Function SetCollumn(argCol As Long, argArrayEx1 As ArrayEx1)
+Public Function SetColumn(argCol As Long, argArrayEx1 As ArrayEx1)
     Dim i
     If Lb(1) <> argArrayEx1.Lb And Ub(1) <> argArrayEx1.Ub Then _
         Call Err.Raise(GetErrNumber(ErrNumAccess.EC_Public, ErrNumType.EC_INPUT_SIZE), "SetColumn", "ArrayEx: need same length")

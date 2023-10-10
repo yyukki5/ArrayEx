@@ -238,7 +238,7 @@ Sub test11()
     
     Call rows.SetRow(1, rows.GetRow(3))
     rows.DebugPrintAll
-    Call rows.SetCollumn(3, rows.GetColumn(1))
+    Call rows.SetColumn(3, rows.GetColumn(1))
     rows.DebugPrintAll
     
     Debug.Assert rows.GetColumn(1).Max = 5
@@ -246,4 +246,5 @@ Sub test11()
 
     
 End Sub
+
 
