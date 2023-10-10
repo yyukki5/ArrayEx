@@ -10,7 +10,6 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private array_ As Variant
-'Private header_ As Variant
 
 Private Enum ErrNumAccess
     EC_Public
@@ -21,6 +20,7 @@ Private Enum ErrNumType
     EC_NULL
     EC_RANK
     EC_INPUT
+    EC_INPUT_SIZE
 End Enum
 
 Public Function Init(array2d) As ArrayEx2
@@ -79,6 +79,28 @@ Public Function SetValue(argRows As Variant, argCols As Variant, argVal As Varia
         ii = ii + 1
     Next i
 '    Set SetValue = Me
+End Function
+
+Public Function SetRow(argRow As Long, argArrayEx1 As ArrayEx1)
+    Dim i
+    If Lb(2) <> argArrayEx1.Lb And Ub(2) <> argArrayEx1.Ub Then _
+        Call Err.Raise(GetErrNumber(ErrNumAccess.EC_Public, ErrNumType.EC_INPUT_SIZE), "SetRow", "ArrayEx: need same length")
+    
+    Dim re:  re = argArrayEx1.Value
+    For i = Lb(2) To Ub(2)
+        array_(argRow, i) = re(i)
+    Next i
+End Function
+
+Public Function SetCollumn(argCol As Long, argArrayEx1 As ArrayEx1)
+    Dim i
+    If Lb(1) <> argArrayEx1.Lb And Ub(1) <> argArrayEx1.Ub Then _
+        Call Err.Raise(GetErrNumber(ErrNumAccess.EC_Public, ErrNumType.EC_INPUT_SIZE), "SetColumn", "ArrayEx: need same length")
+    
+    Dim re:  re = argArrayEx1.Value
+    For i = Lb(1) To Ub(1)
+        array_(i, argCol) = re(i)
+    Next i
 End Function
 
 
@@ -191,41 +213,7 @@ Public Property Get Lb(Optional direction As Long = 1) As Long
 End Property
 
 
-'Public Function CreateHeader() As ArrayEx2
-'    header_ = GetRows(Lb)
-''    array_ = Extract(Lb + 1 & "to" & Ub)
-'    Set CreateHeader = Me
-'End Function
 
-'Public Function GetCollumnIdFrom1stRow(collumnName) As Long
-'    GetCollumnIdFrom1stRow = WorksheetFunction.Match(collumnName, GetRow(1).Value, 0)
-'End Function
-
-
-'Public Function Extract(rows) As ArrayEx2
-'If VarType(rows) = vbLong Then
-'    Set Extract = GetRows(val(rows))
-'    Exit Function
-'End If
-'If VarType(rows) = vbString Then
-'    Dim l As Long, u As Long
-'    Call DecodeToCollone(rows, l, u)
-'    Dim re
-'    ReDim re(1 To u - l + 1, Lb(2) To Ub(2))
-'    Dim i As Long, j As Long, k As Long: k = 1
-'    For i = l To u
-'        For j = Lb(2) To Ub(2)
-'            re(k, j) = array_(i, j)
-'        Next j
-'        k = k + 1
-'    Next i
-'    Dim rearr As New ArrayEx2
-'    Set Extract = rearr.Init(re)
-'End If
-'End Function
-
-
-'デバッグ出力です。なんとメソッドチェーンの中で使えます!!
 Public Function DebugPrintEvaluated(argWithCommna As String, ColumnNumbersWithConnma As String, formulaWithArg As String) As ArrayEx2
     Dim args: args = Split(Replace(argWithCommna, " ", ""), ",")
     Dim cols: cols = Split(Replace(ColumnNumbersWithConnma, " ", ""), ",")
@@ -351,21 +339,6 @@ Nexti:
     
 End Function
 
-
-
-
-'Private Function DecodeToCollone(ByVal ToCollone As String, ByRef l As Long, ByRef u As Long)
-'Dim s As String
-'    s = LCase(Replace(ToCollone, " ", ""))
-'    If InStr(s, "to") > 0 Then
-'        l = val(Left(s, InStr(s, "to") - 1))
-'        u = val(Right(s, InStrRev(s, "to") - 1))
-'    End If
-'    If InStr(s, ":") > 0 Then
-'        l = val(Left(s, InStr(s, ":") - 1))
-'        u = val(Right(s, InStrRev(s, ":")))
-'    End If
-'End Function
 
 Private Function IsErrorCLng(s As String) As Boolean
 On Error GoTo unConvert

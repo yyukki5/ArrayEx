@@ -207,6 +207,7 @@ Sub test9()
     Set rows = a.Init(Range("A1:E5").Value).DebugPrintAll
     
     Call rows.SetValue("3,4", ":", 5)
+    
     rows.DebugPrintAll _
         .GetRows("1,2:3").DebugPrintAll _
         .GetColumns("2,3").DebugPrintAll
@@ -226,6 +227,23 @@ Sub test10()
     c = rows("1to")
     d = rows(, "2")
     e = rows("1:2", "1 to 2")
+    
+End Sub
+
+Sub test11()
+
+    Dim a As New ArrayEx2
+    Dim rows As New ArrayEx2, rows1
+    Set rows = a.Init(Range("A1:E5").Value).DebugPrintAll
+    
+    Call rows.SetRow(1, rows.GetRow(3))
+    rows.DebugPrintAll
+    Call rows.SetCollumn(3, rows.GetColumn(1))
+    rows.DebugPrintAll
+    
+    Debug.Assert rows.GetColumn(1).Max = 5
+    Debug.Assert rows.GetColumn(1).Min = 2
+
     
 End Sub
 

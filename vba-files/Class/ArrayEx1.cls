@@ -49,6 +49,19 @@ Public Function GetItem(index As Long) As ArrayEx0
     Set GetItem = rearr.Init(array_(index))
 End Function
 
+
+
+
+
+Public Function Max() As Variant
+    Max = WorksheetFunction.Max(array_)
+End Function
+Public Function Min() As Variant
+    Min = WorksheetFunction.Min(array_)
+End Function
+
+
+
 Public Function Match(arg, Optional matchType As Long = 0) As Long
    Match = WorksheetFunction.Match(arg, array_, matchType)
 End Function
