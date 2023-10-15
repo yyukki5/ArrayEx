@@ -9,7 +9,35 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+' -------------------------------------------------------------------------
+' Get method : return new instance.
+' Set method : return updated current instance.
+' Unexpected error, ArrayEx should return instance but null value.
+' -------------------------------------------------------------------------
+
 Private array_ As Variant
+
+' Properties ---------------------------------------------------------------------------
+
+Public Property Get Value()
+Attribute Value.VB_UserMemId = 0
+    Value = array_
+End Property
+
+'Public Property Let Value(v)
+'    array_ = v
+'End Property
+
+Public Property Get Ub()
+    Ub = UBound(array_, 1)
+End Property
+
+Public Property Get Lb()
+    Lb = LBound(array_, 1)
+End Property
+
+
+' Public Methods --------------------------------------------------------------------
 
 Public Function Init(array1d As Variant) As ArrayEx1
     If ArrayRank(array1d) <> 1 Then Exit Function
@@ -22,15 +50,6 @@ Public Function Create(Optional arr As Variant) As ArrayEx1
     Dim rearr As New ArrayEx1
     Set Create = IIf(IsMissing(arr), rearr.Init(array_), rearr.Init(arr))
 End Function
-
-Public Property Get Value()
-Attribute Value.VB_UserMemId = 0
-    Value = array_
-End Property
-
-Public Property Let Value(v)
-    array_ = v
-End Property
 
 Public Function ToCollection() As Collection
     Dim coll As New Collection
@@ -52,20 +71,92 @@ End Function
 
 
 
-
-Public Function Max() As Variant
-    Max = WorksheetFunction.Max(array_)
+Public Function CreateFromCollection(collect As Collection) As ArrayEx1
+If ArrayRank(collect(1)) <> 0 Then Exit Function
+    Dim rearr As New ArrayEx1
+    Dim arr As Variant
+    ReDim arr(1 To collect.Count)
+    Dim c As Variant, i As Long:      i = 1
+    For Each c In collect
+            arr(i) = c
+            i = i + 1
+    Next c
+ Set CreateFromCollection = rearr.Init(arr)
 End Function
-Public Function Min() As Variant
-    Min = WorksheetFunction.Min(array_)
-End Function
 
-
-
+' Wrap WorkSheetFunctions ---
 Public Function Match(arg, Optional matchType As Long = 0) As Long
    Match = WorksheetFunction.Match(arg, array_, matchType)
 End Function
 
+' linq Ç¡Ç€Ç¢Ç»Ç…Ç©s -------------
+' EvaluatedAll
+Public Function EvaluatedAll(formulaWithArgx As String) As Boolean
+Dim i As Long, s As String, f As Boolean, f1 As Variant
+f = True
+For i = Lb To Ub
+    s = Replace(formulaWithArgx, "{x}", array_(i))
+    f1 = f And Evaluate(s)
+    f = f And f1
+Next i
+    EvaluatedAll = f
+End Function
+
+' All
+' Contains
+'Max
+Public Function Max() As Variant
+    Max = WorksheetFunction.Max(array_)
+End Function
+'Min
+Public Function Min() As Variant
+    Min = WorksheetFunction.Min(array_)
+End Function
+
+'Sum
+'Count
+'Average
+' First
+'Last
+' EvaluatedWhere
+Public Function WhereEvaluated(formulaWithArgx As String) As ArrayEx1
+Dim i As Long, rearr(), s As String
+ReDim rearr(Lb To Ub)
+Dim f As Boolean
+Dim collect As New Collection
+For i = Lb To Ub
+    s = Replace(formulaWithArgx, "{x}", array_(i))
+   f = Evaluate(s)
+   If f Then collect.Add array_(i)
+Next i
+    
+    Dim rearr1 As New ArrayEx1
+    Set WhereEvaluated = rearr1.CreateFromCollection(collect)
+End Function
+
+' Skip
+' Take
+' Distinct
+' OrderBy
+' OrderByDescending
+' Reverse
+' EvaluatedSelect
+Public Function SelectEvaluated(formulaWithArgx As String) As ArrayEx1
+Dim i As Long, rearr(), s As String
+ReDim rearr(Lb To Ub)
+For i = Lb To Ub
+    s = Replace(formulaWithArgx, "{x}", array_(i))
+   rearr(i) = Evaluate(s)
+Next i
+    
+    Dim rearr0 As New ArrayEx1
+    Set SelectEvaluated = rearr0.Init(rearr)
+End Function
+
+
+
+
+' Debugs --------------------------
 Public Function DebugPrintAllItems() As ArrayEx1
     Debug.Print Join(array_, ",")
     Set DebugPrintAllItems = Me
@@ -88,55 +179,8 @@ Public Function DebugPrint(Optional pre$, Optional formatString$, Optional suf$)
     Set DebugPrint = Me
 End Function
 
-Public Function SelectEvaluated(formulaWithArgx As String) As ArrayEx1
-Dim i As Long, rearr(), s As String
-ReDim rearr(Lb To Ub)
-For i = Lb To Ub
-    s = Replace(formulaWithArgx, "{x}", array_(i))
-   rearr(i) = Evaluate(s)
-Next i
-    
-    Dim rearr0 As New ArrayEx1
-    Set SelectEvaluated = rearr0.Init(rearr)
-End Function
 
-Public Function WhereEvaluated(formulaWithArgx As String) As ArrayEx1
-Dim i As Long, rearr(), s As String
-ReDim rearr(Lb To Ub)
-Dim f As Boolean
-Dim collect As New Collection
-For i = Lb To Ub
-    s = Replace(formulaWithArgx, "{x}", array_(i))
-   f = Evaluate(s)
-   If f Then collect.Add array_(i)
-Next i
-    
-    Dim rearr1 As New ArrayEx1
-    Set WhereEvaluated = rearr1.CreateFromCollection(collect)
-End Function
-
-Public Function CreateFromCollection(collect As Collection) As ArrayEx1
-If ArrayRank(collect(1)) <> 0 Then Exit Function
-    Dim rearr As New ArrayEx1
-    Dim arr As Variant
-    ReDim arr(1 To collect.Count)
-    Dim c As Variant, i As Long:      i = 1
-    For Each c In collect
-            arr(i) = c
-            i = i + 1
-    Next c
- Set CreateFromCollection = rearr.Init(arr)
-End Function
-
-
-
-Public Property Get Ub()
-    Ub = UBound(array_, 1)
-End Property
-
-Public Property Get Lb()
-    Lb = LBound(array_, 1)
-End Property
+' Private Functions ------------------------------------------------------------------
 
 ' [Get] îzóÒÇÃéüå≥êî
 Private Function ArrayRank(Optional ary As Variant = Empty) As Integer

@@ -9,7 +9,11 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-'Unexpected error, ArrayEx should return instance but null value.
+' -------------------------------------------------------------------------
+' Get method : return new instance.
+' Set method : return updated current instance.
+' Unexpected error, ArrayEx should return instance but null value.
+' -------------------------------------------------------------------------
 
 Private array_ As Variant
 
@@ -25,12 +29,8 @@ Private Enum ErrNumType
     EC_INPUT_SIZE
 End Enum
 
-Public Function Init(array2d) As ArrayEx2
-    If ArrayRank(array2d) <> 2 Then Call Err.Raise(GetErrNumber(ErrNumAccess.EC_Public, ErrNumType.EC_RANK), "Init", "ArrayEx: need 2d array")
-    array_ = array2d
-    Set Init = Me
-End Function
 
+' Properties ---------------------------------------------------------------------------
 Public Property Get Value(Optional rows As Variant, Optional cols As Variant)
 Attribute Value.VB_UserMemId = 0
     
@@ -39,34 +39,50 @@ Attribute Value.VB_UserMemId = 0
         Exit Property
     End If
     
-    If IsMissing(rows) = False And IsMissing(cols) = True Then Value = ExtractCore(rows, ":").ToPrimitive
-    If IsMissing(rows) = True And IsMissing(cols) = False Then Value = ExtractCore(":", cols).ToPrimitive
-    If IsMissing(rows) = False And IsMissing(cols) = False Then Value = ExtractCore(rows, cols).ToPrimitive
+'    If IsMissing(rows) = False And IsMissing(cols) = True Then Value = ExtractCore(rows, ":").ToPrimitive
+'    If IsMissing(rows) = True And IsMissing(cols) = False Then Value = ExtractCore(":", cols).ToPrimitive
+'    If IsMissing(rows) = False And IsMissing(cols) = False Then Value = ExtractCore(rows, cols).ToPrimitive
     
 End Property
+
+
+Public Property Get Ub(Optional direction As Long = 1) As Long
+    Ub = UBound(array_, direction)
+End Property
+
+Public Property Get Lb(Optional direction As Long = 1) As Long
+    Lb = LBound(array_, direction)
+End Property
+
+
+' Public Methods --------------------------------------------------------------------
+Public Function Init(array2d) As ArrayEx2
+    If ArrayRank(array2d) <> 2 Then Call Err.Raise(GetErrNumber(ErrNumAccess.EC_Public, ErrNumType.EC_RANK), "Init", "ArrayEx: need 2d array")
+    array_ = array2d
+    Set Init = Me
+End Function
+
 
 Public Function ToRange(rng As Range)
     rng.Resize(Ub(1), Ub(2)).Value = array_
 End Function
 
 
-Public Function ToPrimitive() As Variant
-    If Ub = 1 Then
-        If Ub(2) = 1 Then
-            ToPrimitive = array_(Ub, Ub(2))
-        Else
-            ToPrimitive = GetRow(Ub(1)).Value()
-        End If
-    Else
-        If Ub(2) = 1 Then
-            ToPrimitive = GetColumn(Ub(2)).Value()
-        Else
-            ToPrimitive = array_
-        End If
-    End If
-End Function
-
-
+'Public Function ToPrimitive() As Variant
+'    If Ub = 1 Then
+'        If Ub(2) = 1 Then
+'            ToPrimitive = array_(Ub, Ub(2))
+'        Else
+'            ToPrimitive = GetRow(Ub(1)).Value()
+'        End If
+'    Else
+'        If Ub(2) = 1 Then
+'            ToPrimitive = GetColumn(Ub(2)).Value()
+'        Else
+'            ToPrimitive = array_
+'        End If
+'    End If
+'End Function
 
 Public Function SetValue(argRows As Variant, argCols As Variant, argVal As Variant) As ArrayEx2
     Dim rows, cols
@@ -110,11 +126,6 @@ Public Function SetColumn(argCol As Long, argArrayEx1 As ArrayEx1)
 End Function
 
 
-Public Function Transpose() As ArrayEx2
-    Dim rearr As New ArrayEx2
-    Set Transpose = rearr.Init(WorksheetFunction.Transpose(array_))
-End Function
-
 Public Function GetRows(rows As Variant) As ArrayEx2
     Set GetRows = ExtractCore(rows, ":")
 End Function
@@ -146,44 +157,6 @@ Public Function Extract(rows As Variant, cols As Variant) As ArrayEx2
     Set Extract = ExtractCore(rows, cols)
 End Function
 
-Private Function argToArray(arg As Variant, rowcol As Long) As Variant
-Dim re
-If VarType(arg) = vbLong Or VarType(arg) = vbInteger Then
-    argToArray = Array(arg)
-    Exit Function
-End If
-If VarType(arg) = vbString Then
-    argToArray = DecodeToCollone2Array(arg, rowcol)
-    Exit Function
-End If
-If VarType(arg) > vbArray Then
-    argToArray = arg
-    Exit Function
-End If
-End Function
-
-Private Function ExtractCore(argRows As Variant, argCols As Variant) As ArrayEx2
-    Dim rows, cols
-    rows = argToArray(argRows, 1)
-    cols = argToArray(argCols, 2)
-
-    Dim i, j, ii, jj
-    Dim rearr As New ArrayEx2
-    Dim re
-    ReDim re(1 To UBound(rows) - LBound(rows) + 1, 1 To UBound(cols) - LBound(cols) + 1)
-    ii = 1
-    For i = LBound(rows) To UBound(rows)
-        jj = 1
-        For j = LBound(cols) To UBound(cols)
-            re(ii, jj) = array_(rows(i), cols(j))
-            jj = jj + 1
-        Next j
-        ii = ii + 1
-    Next i
-    Set ExtractCore = rearr.Init(re)
-End Function
-
-
 
 Public Function ToCollection() As Collection
     Dim coll As New Collection
@@ -207,14 +180,6 @@ Public Function CreateFromCollection(col) As ArrayEx2
     Next c
     Set CreateFromCollection = rearr
 End Function
-
-Public Property Get Ub(Optional direction As Long = 1) As Long
-    Ub = UBound(array_, direction)
-End Property
-
-Public Property Get Lb(Optional direction As Long = 1) As Long
-    Lb = LBound(array_, direction)
-End Property
 
 
 
@@ -283,10 +248,50 @@ Function AddRow(row) As ArrayEx2
         Set AddRow = rearr.Init(re)
 End Function
 
+Public Function Transpose() As ArrayEx2
+    Dim rearr As New ArrayEx2
+    Set Transpose = rearr.Init(WorksheetFunction.Transpose(array_))
+End Function
 
 
+' Private Functions ------------------------------------------------------------------
 
+Private Function ExtractCore(argRows As Variant, argCols As Variant) As ArrayEx2
+    Dim rows, cols
+    rows = argToArray(argRows, 1)
+    cols = argToArray(argCols, 2)
 
+    Dim i, j, ii, jj
+    Dim rearr As New ArrayEx2
+    Dim re
+    ReDim re(1 To UBound(rows) - LBound(rows) + 1, 1 To UBound(cols) - LBound(cols) + 1)
+    ii = 1
+    For i = LBound(rows) To UBound(rows)
+        jj = 1
+        For j = LBound(cols) To UBound(cols)
+            re(ii, jj) = array_(rows(i), cols(j))
+            jj = jj + 1
+        Next j
+        ii = ii + 1
+    Next i
+    Set ExtractCore = rearr.Init(re)
+End Function
+
+Private Function argToArray(arg As Variant, rowcol As Long) As Variant
+Dim re
+If VarType(arg) = vbLong Or VarType(arg) = vbInteger Then
+    argToArray = Array(arg)
+    Exit Function
+End If
+If VarType(arg) = vbString Then
+    argToArray = DecodeToCollone2Array(arg, rowcol)
+    Exit Function
+End If
+If VarType(arg) > vbArray Then
+    argToArray = arg
+    Exit Function
+End If
+End Function
 
 Private Function DecodeToCollone2Array(ByVal ToCollone As String, rowcol As Long)
 Dim l, u, i, l_, u_, t
