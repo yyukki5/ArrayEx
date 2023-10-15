@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+'Unexpected error, ArrayEx should return instance but null value.
+
 Private array_ As Variant
 
 Private Enum ErrNumAccess
@@ -41,8 +43,12 @@ Attribute Value.VB_UserMemId = 0
     If IsMissing(rows) = True And IsMissing(cols) = False Then Value = ExtractCore(":", cols).ToPrimitive
     If IsMissing(rows) = False And IsMissing(cols) = False Then Value = ExtractCore(rows, cols).ToPrimitive
     
-
 End Property
+
+Public Function ToRange(rng As Range)
+    rng.Resize(Ub(1), Ub(2)).Value = array_
+End Function
+
 
 Public Function ToPrimitive() As Variant
     If Ub = 1 Then
@@ -62,7 +68,7 @@ End Function
 
 
 
-Public Function SetValue(argRows As Variant, argCols As Variant, argVal As Variant)
+Public Function SetValue(argRows As Variant, argCols As Variant, argVal As Variant) As ArrayEx2
     Dim rows, cols
     rows = argToArray(argRows, 1)
     cols = argToArray(argCols, 2)
@@ -78,7 +84,7 @@ Public Function SetValue(argRows As Variant, argCols As Variant, argVal As Varia
         Next j
         ii = ii + 1
     Next i
-'    Set SetValue = Me
+    Set SetValue = Me
 End Function
 
 Public Function SetRow(argRow As Long, argArrayEx1 As ArrayEx1)
@@ -180,7 +186,6 @@ End Function
 
 
 Public Function ToCollection() As Collection
-
     Dim coll As New Collection
     Dim arr As New ArrayEx1
     Dim i As Long
@@ -188,20 +193,19 @@ Public Function ToCollection() As Collection
         Set arr = GetRow(i)
         coll.Add arr
     Next i
-
     Set ToCollection = coll
 End Function
 
 Public Function CreateFromCollection(col) As ArrayEx2
-Dim rearr As New ArrayEx2
-Dim row As New ArrayEx1
-Dim re
-Dim c
-For Each c In col
-If ArrayRank(c) <> 1 Then Exit Function
-Set rearr = rearr.AddRow(row.Create(c))
-Next c
-Set CreateFromCollection = rearr
+    Dim rearr As New ArrayEx2
+    Dim row As New ArrayEx1
+    Dim re
+    Dim c
+    For Each c In col
+    If ArrayRank(c) <> 1 Then Exit Function
+    Set rearr = rearr.AddRow(row.Create(c))
+    Next c
+    Set CreateFromCollection = rearr
 End Function
 
 Public Property Get Ub(Optional direction As Long = 1) As Long

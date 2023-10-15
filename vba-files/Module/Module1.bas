@@ -247,4 +247,26 @@ Sub test11()
     
 End Sub
 
+Sub test12()
+    Dim a As New ArrayEx2
+    Dim b
+    Call a.Init(Range("A1:E5").Value).DebugPrintAll _
+        .GetColumns("3,2,1").DebugPrintAll _
+        .Transpose.DebugPrintAll _
+        .SetValue(1, 1, 5) _
+        .ToRange(Range("H10"))
+End Sub
 
+
+Public Function SearchWord(ary, word As String) As Variant
+    Dim a As New ArrayEx2: a.Init (ary)
+    Dim i As Long, s As String
+    For i = a.Lb To a.Ub
+        If InStr(WorksheetFunction.TextJoin(",", True, a.GetRow(i).Value), word) > 0 Then
+        s = s & i & ","
+        End If
+    Next i
+    If s = "" Then Exit Function
+    s = Left(s, Len(s) - 1)
+    SearchWord = a.GetRows(s).Value
+End Function
