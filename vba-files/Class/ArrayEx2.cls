@@ -250,11 +250,8 @@ End Function
 
 Public Function DebugPrintAll() As ArrayEx2
     Dim s: s = ToString()
-    Dim ss:  ss = Split(s, ";")
-    Dim i As Long
-    For i = LBound(ss) To UBound(ss)
-        Debug.Print ss(i) & ";"
-    Next i
+    Dim ss:  ss = Replace(s, ";", ";" & vbCrLf)
+    Debug.Print ss
     Set DebugPrintAll = Me
 End Function
 
