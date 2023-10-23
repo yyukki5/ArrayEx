@@ -270,3 +270,5 @@ Public Function SearchWord(ary, word As String) As Variant
     s = Left(s, Len(s) - 1)
     SearchWord = a.GetRows(s).Value
 End Function
+
+
