@@ -40,7 +40,7 @@ End Function
 Public Function Create(Optional array0d As Variant) As ArrayEx0
     If IsArrayRank(array0d, 0) = False Then Call Err.Raise(101, "ArrayEx0 Create", "ArrayEx: Need 0d array (value)")
     Dim rearr As New ArrayEx0
-    Set Create = IIf(IsMissing(arr), rearr.Init(array_), rearr.Init(arr))
+    Set Create = IIf(IsMissing(array0d), rearr.Init(array_), rearr.Init(array0d))
 End Function
 
 Public Function Equals(array0d) As Boolean

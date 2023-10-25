@@ -44,12 +44,14 @@ End Property
 
 ' Public Methods --------------------------------------------------------------------
 Public Function Init(array1d As Variant) As ArrayEx1
+    If IsNull(array1d) Then array_ = Null: Exit Function:
     If IsArrayRank(array1d, 1) = False Then Call Err.Raise(1101, "ArrayEx1 Init", "ArrayEx: Need 1d array")
     array_ = array1d
     Set Init = Me
 End Function
 
 Public Function Create(Optional arr As Variant) As ArrayEx1
+    If IsNull(arr) Then array_ = Null: Exit Function
     If IsArrayRank(arr, 1) = False Then Call Err.Raise(1101, "ArrayEx1 Create", "ArrayEx: Need 1d array")
     Dim rearr As New ArrayEx1
     Set Create = IIf(IsMissing(arr), rearr.Init(array_), rearr.Init(arr))
@@ -140,8 +142,16 @@ Public Function Match(arg, Optional matchType As Long = 0) As Long
 End Function
 
 ' linqs  -------------
-' All
 ' Contains
+Public Function Contains(element As Variant) As Boolean
+    Contains = True
+    Dim i As Long
+    For i = Lb To Ub
+        If array_(i) = element Then Exit Function
+    Next i
+    Contains = False
+End Function
+
 ' Max
 Public Function Max() As Variant
     Max = WorksheetFunction.Max(array_)
@@ -150,46 +160,110 @@ End Function
 Public Function Min() As Variant
     Min = WorksheetFunction.Min(array_)
 End Function
-
 'Sum
+Public Function Sum() As Variant
+    Sum = WorksheetFunction.Sum(array_)
+End Function
+
 'Count
 'Average
 ' First
+Public Function First() As ArrayEx0
+    Set First = GetElement(Lb)
+End Function
 'Last
-' Skip
-' Take
-' Distinct
-' OrderBy
-' OrderByDescending
-' Reverse
-
-' EvaluatedWhere
-Public Function WhereEvaluated(formulaWithArgx As String) As ArrayEx1
-Dim i As Long, rearr(), s As String
-ReDim rearr(Lb To Ub)
-Dim f As Boolean
-Dim collect As New Collection
-For i = Lb To Ub
-    s = Replace(formulaWithArgx, "{x}", array_(i))
-   f = Evaluate(s)
-   If f Then collect.Add array_(i)
-Next i
-    
-    Dim rearr1 As New ArrayEx1
-    Set WhereEvaluated = rearr1.CreateFromCollection(collect)
+Public Function Last() As ArrayEx0
+    Set Last = GetElement(Ub)
 End Function
 
-' EvaluatedSelect
-Public Function SelectEvaluated(formulaWithArgx As String) As ArrayEx1
+' Skip
+Public Function Skip(skipIndex As Long) As ArrayEx1
+    Set Skip = ExtractCore(skipIndex + 1 & ":" & Ub)
+End Function
+
+' Take
+Public Function Take(skipIndex As Long) As ArrayEx1
+    Set Take = ExtractCore(Lb & ":" & skipIndex)
+End Function
+
+' Distinct
+Public Function Distinct() As ArrayEx1
+     Dim re As New ArrayEx1
+     Set Distinct = re.Init(WorksheetFunction.Unique(array_))
+End Function
+
+' OrderBy
+Public Function OrderBy() As ArrayEx1
+    Dim re As New ArrayEx1
+    Set OrderBy = re.Init(WorksheetFunction.Sort(array_))
+End Function
+
+' OrderByDescending
+Public Function OrderByDescending() As ArrayEx1
+    Dim re As New ArrayEx1
+    Set OrderByDescending = re.Init(WorksheetFunction.Sort(array_, , -1, True))
+End Function
+
+' Reverse
+Public Function Reverse() As ArrayEx1
+    Dim rearr: ReDim rearr(Lb To Ub)
+    Dim i As Long
+    For i = Lb To Ub
+        rearr(i) = array_(Ub - i + 1)
+    Next i
+    Dim re As New ArrayEx1
+    Set Reverse = re.Init(rearr)
+End Function
+
+' All
+Public Function AllEvaluate(argument As String, formula As String) As Boolean
+    AllEvaluate = False
+    Dim i As Long, f
+    For i = Lb To Ub
+       If TryEvaluate(Replace(formula, argument, array_(i)), f) = False Then Exit Function
+       If f = False Then Exit Function
+    Next i
+    AllEvaluate = True
+    Exit Function
+End Function
+
+' Any
+Public Function AnyEvaluate(argument As String, formula As String) As Boolean
+    AnyEvaluate = True
+    Dim i As Long, f
+    For i = Lb To Ub
+       If TryEvaluate(Replace(formula, argument, array_(i)), f) = False Then Exit Function
+       If f = True Then Exit Function
+    Next i
+    AnyEvaluate = False
+End Function
+
+' Where
+Public Function WhereEvaluated(argument As String, formula As String) As ArrayEx1
+    Dim i As Long, s As String, indexes As String, f
+    For i = Lb To Ub
+        s = Replace(formula, argument, array_(i))
+        If TryEvaluate(s, f) = False Then Exit Function
+        If f Then indexes = indexes & i & ","
+    Next i
+    indexes = Left(indexes, Len(indexes) - 1)
+    Set WhereEvaluated = ExtractCore(indexes)
+End Function
+
+' Select
+Public Function SelectEvaluated(argument As String, formula As String) As ArrayEx1
 Dim i As Long, rearr(), s As String
 ReDim rearr(Lb To Ub)
 For i = Lb To Ub
-    s = Replace(formulaWithArgx, "{x}", array_(i))
-   rearr(i) = Evaluate(s)
+    s = Replace(formula, argument, array_(i))
+    rearr(i) = Evaluate(s)
+    If IsError(rearr(i)) = True Then GoTo errEvaluate
 Next i
-    
     Dim rearr0 As New ArrayEx1
     Set SelectEvaluated = rearr0.Init(rearr)
+    Exit Function
+errEvaluate:
+   Call Err.Raise(1103, "ArrayEx1, SelectEvaluated()", "String in evaluate() is error :" & s & ".")
 End Function
 
 
@@ -302,6 +376,21 @@ On Error GoTo unConvert
     Exit Function
 unConvert:
     IsErrorCLng = True
+End Function
+
+'
+Private Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Boolean
+    TryEvaluate = False
+    re = Evaluate(evaluateString)
+    If IsError(re) = True Then GoTo errEvaluate
+    If VarType(re) <> vbBoolean Then GoTo errEvaluateFormula
+    TryEvaluate = True
+    Exit Function
+
+errEvaluate:
+   Call Err.Raise(1003, "ArrayEx1, TryEvaluate()", "String in evaluate() is error :" & evaluateString & ".")
+errEvaluateFormula:
+   Call Err.Raise(1004, "ArrayEx1, TryEvaluate()", "String formula in evaluate() is wrong. should be return boolen. :" & evaluateString & ".")
 End Function
 
 

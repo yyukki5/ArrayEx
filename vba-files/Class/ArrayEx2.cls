@@ -262,6 +262,7 @@ Public Function Transpose() As ArrayEx2
 End Function
 
 
+
 ' Private Methods ------------------------------------------------------------------
 Private Function ExtractCore(argRows As Variant, argCols As Variant) As ArrayEx2
     Dim rows, cols
@@ -360,6 +361,19 @@ unConvert:
     IsErrorCLng = True
 End Function
 
+Private Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Boolean
+    TryEvaluate = False
+    re = Evaluate(evaluateString)
+    If IsError(re) = True Then GoTo errEvaluate
+    If VarType(re) <> vbBoolean Then GoTo errEvaluateFormula
+    TryEvaluate = True
+    Exit Function
+
+errEvaluate:
+   Call Err.Raise(1003, "ArrayEx1, TryEvaluate()", "String in evaluate() is error :" & evaluateString & ".")
+errEvaluateFormula:
+   Call Err.Raise(1004, "ArrayEx1, TryEvaluate()", "String formula in evaluate() is wrong. should be return boolen. :" & evaluateString & ".")
+End Function
 
 Private Function IsArrayRank(inspectedArray As Variant, inspectedRank As Long) As Boolean
     Dim errTest As Long

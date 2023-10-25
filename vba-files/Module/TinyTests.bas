@@ -5,13 +5,13 @@ Sub RunTests()
     ' before using, switch error check in Tools > Options > General > Error trap
     Debug.Print "--- Start tests ---"
     
-    RunTest ("Init_NoException")
-    RunTest ("GetValue_NoEception")
+    RunTest "Init_NoException"
+    RunTest "GetValue_NoEception"
     RunTest "SetValue_GetMethodIsCorrect_NoException"
     RunTest "AddElement_NoException"
     RunTest "ToCollection_NoException"
     '    RunTest "DebugPrint_NoException"
-    
+    RunTest "Array1Linqs_NoException"
     
     Debug.Print "--- Finish tests ---"
 End Sub
@@ -213,6 +213,62 @@ Sub DebugPrint_NoException()
     Exit Sub
 errTest:
 End Sub
+
+
+Sub Array1Linqs_NoException()
+    On Error Resume Next
+    
+    Dim a1d As New ArrayEx1
+    a1d.Init (array1d())
+        
+    If AssertTrue(a1d.Contains(4)) Then Else Exit Sub
+    If AssertEqual(1, a1d.Min()) Then Else Exit Sub
+    If AssertEqual(5, a1d.Max()) Then Else Exit Sub
+        
+    If AssertEqual(1, a1d.First()) Then Else Exit Sub
+    If AssertEqual(5, a1d.Last()) Then Else Exit Sub
+    
+    If AssertEqual("[3,4,5]", a1d.Skip(2).ToString()) Then Else Exit Sub
+    If AssertEqual("[1,2,3]", a1d.Take(3).ToString()) Then Else Exit Sub
+    If AssertEqual("[1,2,3,4,5]", a1d.OrderBy().ToString()) Then Else Exit Sub
+    If AssertEqual("[5,4,3,2,1]", a1d.OrderByDescending().ToString()) Then Else Exit Sub
+    If AssertEqual("[5,4,3,2,1]", a1d.Reverse().ToString()) Then Else Exit Sub
+    
+    If AssertEqual("[4,5]", a1d.WhereEvaluated("x", "x > 3").ToString()) Then Else Exit Sub
+    
+    Call a1d.WhereEvaluated("x", "y>3")
+    If AssertEqual(1003, Err.Number) Then Else Exit Sub
+    Call a1d.WhereEvaluated("x", "x + 3")
+    If AssertEqual(1004, Err.Number) Then Else Exit Sub
+    
+    
+    If AssertEqual("[4,7,12,19,28]", a1d.SelectEvaluated("{x}", "{x}^2+ 3").ToString()) Then Else Exit Sub
+    
+    If AssertTrue(a1d.AllEvaluate("x", "x > 0 ")) Then Else Exit Sub
+    If AssertFalse(a1d.AllEvaluate("x", "x > 1 ")) Then Else Exit Sub
+    Call a1d.AllEvaluate("x", "x & Hello ")
+    If AssertEqual(1003, Err.Number) Then Else Exit Sub
+    Call a1d.AllEvaluate("x", "x + 0 ")
+    If AssertEqual(1004, Err.Number) Then Else Exit Sub
+    
+    If AssertTrue(a1d.AnyEvaluate("x", "x > 4 ")) Then Else Exit Sub
+    If AssertFalse(a1d.AnyEvaluate("x", "x > 5 ")) Then Else Exit Sub
+    
+    
+    Dim a2d As New ArrayEx2
+    a2d.Init (array2d())
+    Call a2d.WhereEvaluated("x,y", "1,2", "x+y=3")
+    
+    
+End Sub
+
+
+
+
+
+
+
+
 
 Private Function RunTest(testName As String)
     Dim res As String
