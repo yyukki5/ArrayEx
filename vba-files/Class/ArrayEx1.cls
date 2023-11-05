@@ -41,6 +41,10 @@ Public Property Get Lb()
     Lb = LBound(array_, 1)
 End Property
 
+Public Property Get Count() As Long
+    Count = UBound(array_, 1) - LBound(array_, 1) + 1
+End Property
+
 
 ' Public Methods --------------------------------------------------------------------
 Public Function Init(array1d As Variant) As ArrayEx1
@@ -189,7 +193,17 @@ End Function
 ' Distinct
 Public Function Distinct() As ArrayEx1
      Dim re As New ArrayEx1
-     Set Distinct = re.Init(WorksheetFunction.Unique(array_))
+     Dim var As Variant
+     Dim i As Long, s As String, sIndexes As String
+     For i = Lb To Ub
+        If InStr(s, array_(i)) = 0 Then
+            s = s & array_(i) & ","
+            sIndexes = sIndexes & i & ","
+        End If
+     Next i
+     If sIndexes = "" Then Exit Function
+     sIndexes = Left(sIndexes, Len(sIndexes) - 1)
+     Set Distinct = ExtractCore(sIndexes)
 End Function
 
 ' OrderBy

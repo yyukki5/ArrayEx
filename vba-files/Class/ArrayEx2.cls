@@ -39,6 +39,9 @@ Public Property Get Lb(Optional direction As Long = 1) As Long
     Lb = LBound(array_, direction)
 End Property
 
+Public Property Get Count() As Long
+    Count = UBound(array_, 1) - LBound(array_, 1) + 1
+End Property
 
 ' Public Methods --------------------------------------------------------------------
 Public Function Init(array2d) As ArrayEx2
@@ -262,6 +265,144 @@ Public Function Transpose() As ArrayEx2
 End Function
 
 
+' Linq --------------------------
+
+' First
+Public Function First() As ArrayEx1
+    Set First = GetRow(Lb)
+End Function
+'Last
+Public Function Last() As ArrayEx1
+    Set Last = GetRow(Ub)
+End Function
+
+' Skip
+Public Function Skip(skipIndex As Long) As ArrayEx2
+    Set Skip = ExtractCore(skipIndex + 1 & ":" & Ub, ":")
+End Function
+
+' Take
+Public Function Take(skipIndex As Long) As ArrayEx2
+    Set Take = ExtractCore(Lb & ":" & skipIndex, ":")
+End Function
+
+'' Distinct
+'Public Function Distinct(column As Long) As ArrayEx2
+'     Dim re As New ArrayEx2
+'     Set Distinct = re.Init(WorksheetFunction.Unique(array_))
+'End Function
+
+' OrderBy
+Public Function OrderBy(column As Long) As ArrayEx2
+    Dim re As New ArrayEx2
+    Set OrderBy = re.Init(WorksheetFunction.Sort(array_, column))
+End Function
+
+' OrderByDescending
+Public Function OrderByDescending(column As Long) As ArrayEx2
+    Dim re As New ArrayEx2
+    Set OrderByDescending = re.Init(WorksheetFunction.Sort(array_, column, -1, False))
+End Function
+
+' Reverse
+Public Function Reverse() As ArrayEx2
+    Dim rearr: ReDim rearr(Lb To Ub)
+    Dim i As Long
+    For i = Lb To Ub
+        rearr(i) = array_(Ub - i + 1)
+    Next i
+    Dim re As New ArrayEx2
+    Set Reverse = ExtractCore(rearr, ":")
+End Function
+
+' All
+Public Function AllEvaluate(arguments, columnNumbers, formula As String) As Boolean
+    AllEvaluate = False
+    Dim i As Long, j As Long, s As String, indexes As String, f
+    Dim args, cols
+    args = Split(arguments, ",")
+    cols = Split(columnNumbers, ",")
+    If UBound(args) <> UBound(cols) Then Err.Raise 2002, "AllEvaluate", "argument string is unsupported."
+    
+    For i = Lb To Ub
+        s = formula
+        For j = LBound(args) To UBound(args)
+            s = Replace(s, args(j), array_(i, cols(j)))
+        Next j
+        If TryEvaluate(s, f) = False Then Exit Function
+       If f = False Then Exit Function
+    Next i
+    AllEvaluate = True
+    Exit Function
+End Function
+
+' Any
+Public Function AnyEvaluate(arguments, columnNumbers, formula As String) As Boolean
+    AnyEvaluate = True
+    Dim i As Long, j As Long, s As String, indexes As String, f
+    Dim args, cols
+    args = Split(arguments, ",")
+    cols = Split(columnNumbers, ",")
+    If UBound(args) <> UBound(cols) Then Err.Raise 2002, "AnyEvaluate", "argument string is unsupported."
+    
+    For i = Lb To Ub
+        s = formula
+        For j = LBound(args) To UBound(args)
+            s = Replace(s, args(j), array_(i, cols(j)))
+        Next j
+        If TryEvaluate(s, f) = False Then Exit Function
+        If f = True Then Exit Function
+    Next i
+    AnyEvaluate = False
+End Function
+
+
+' Where
+Public Function WhereEvaluated(arguments, columnNumbers, formula As String) As ArrayEx2
+    Dim i As Long, j As Long, s As String, indexes As String, f
+    Dim args, cols
+    args = Split(arguments, ",")
+    cols = Split(columnNumbers, ",")
+    If UBound(args) <> UBound(cols) Then Err.Raise 2002, "WhereEvaluated", "argument string is unsupported."
+    
+    For i = Lb To Ub
+        s = formula
+        For j = LBound(args) To UBound(args)
+            s = Replace(s, args(j), array_(i, cols(j)))
+        Next j
+        If TryEvaluate(s, f) = False Then Exit Function
+        If f Then indexes = indexes & i & ","
+    Next i
+    indexes = Left(indexes, Len(indexes) - 1)
+    Set WhereEvaluated = ExtractCore(indexes, ":")
+End Function
+
+' Select
+Public Function SelectEvaluated(arguments, columnNumbers, formula As String) As ArrayEx1
+    Dim i As Long, j As Long, s As String, indexes As String, f
+    Dim args, cols
+    args = Split(arguments, ",")
+    cols = Split(columnNumbers, ",")
+    
+    Dim rearr()
+    ReDim rearr(Lb To Ub)
+        For i = Lb To Ub
+        s = formula
+        For j = LBound(args) To UBound(args)
+            s = Replace(s, args(j), array_(i, cols(j)))
+        Next j
+        If TryEvaluate(s, f, False) = False Then Exit Function
+        rearr(i) = f
+    Next i
+
+    Dim re As New ArrayEx1
+    Set SelectEvaluated = re.Init(rearr)
+    Exit Function
+End Function
+
+
+
+
 
 ' Private Methods ------------------------------------------------------------------
 Private Function ExtractCore(argRows As Variant, argCols As Variant) As ArrayEx2
@@ -361,19 +502,23 @@ unConvert:
     IsErrorCLng = True
 End Function
 
-Private Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Boolean
+Private Function TryEvaluate(evaluateString As String, ByRef re As Variant, Optional isBoolean As Boolean = True) As Boolean
     TryEvaluate = False
     re = Evaluate(evaluateString)
     If IsError(re) = True Then GoTo errEvaluate
-    If VarType(re) <> vbBoolean Then GoTo errEvaluateFormula
+    If isBoolean And VarType(re) <> vbBoolean Then GoTo errEvaluateFormula
     TryEvaluate = True
     Exit Function
 
 errEvaluate:
-   Call Err.Raise(1003, "ArrayEx1, TryEvaluate()", "String in evaluate() is error :" & evaluateString & ".")
+   Call Err.Raise(2003, "ArrayEx2, TryEvaluate()", "String in evaluate() is error :" & evaluateString & ".")
 errEvaluateFormula:
-   Call Err.Raise(1004, "ArrayEx1, TryEvaluate()", "String formula in evaluate() is wrong. should be return boolen. :" & evaluateString & ".")
+   Call Err.Raise(2004, "ArrayEx2, TryEvaluate()", "String formula in evaluate() is wrong. should be return boolen. :" & evaluateString & ".")
 End Function
+
+
+
+
 
 Private Function IsArrayRank(inspectedArray As Variant, inspectedRank As Long) As Boolean
     Dim errTest As Long
