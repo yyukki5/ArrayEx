@@ -1,0 +1,12 @@
+node_modules/
+logs/
+xvba_excel_backup/
+xvba_modules/
+xvba_unit_test/
+package.json
+config.json
+
+# not using
+ribbons/
+ThisWorkbook.cls
+Sheet1.cls
