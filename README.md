@@ -1,6 +1,10 @@
 # ArrayEx
 GitHubの練習と、最近勉強したVBAの練習と、作ったものがアウトプットされないと気が済まない気がしてきたというレポジトリ
 
+・ArrayEx (本体)    : vba-files > Class 
+・Test, Sample      : vba-files > Module
+
+
 C#のメソッドチェーンのように書けると嬉しいなぁというアイディアから。思い立ったので自作。
 作っているうちに気が付きましたが、インターネットを探すと素晴らしい先人の作品が既にありました...
 ただし、これは趣味のプログラムなので、なにかが優れているということは求めていません...
@@ -13,4 +17,17 @@ C#のメソッドチェーンのように書けると嬉しいなぁというア
 ・MATLABっぽい感じで要素を指定できると個人的に嬉しいので、":"　や "To" でGet出来るようにしました。
 ・LinqっぽいMethodはいくつかを抜粋して実装しました。
 ・処理が高速というわけではない。
+
+
+Sample
+    Dim arr As New ArrayEx2
+    Call arr.Init(Range("A1:E3").Value) _
+        .DebugPrintAll _
+        .Extract("1:2", "3:5") _
+        .DebugPrintAll _
+        .GetRow(2) _
+        .DebugPrintAll _
+        .SetElement(1, 11) _
+        .DebugPrintAll _
+        .ToRange(Range("A5"))
 

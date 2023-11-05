@@ -10,6 +10,8 @@ Sub Sample()
         .DebugPrintAll _
         .GetRow(2) _
         .DebugPrintAll _
+        .SetElement(1, 11) _
+        .DebugPrintAll _
         .ToRange(Range("A5"))
     
 End Sub
