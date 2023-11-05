@@ -2,7 +2,10 @@
 GitHubの練習と、最近勉強したVBAの練習と、作ったものがアウトプットされないと気が済まない気がしてきたというレポジトリ  
 
 - ArrayEx (本体)    : vba-files > Class  
-- Test, Sample      : vba-files > Module  
+    - ArrayEx0.cls 
+    - ArrayEx1.cls
+    - ArrayEx2.cls
+- Test, Sample      : vba-files > Module, and ArrayEx.xlsm 
 
 C#のメソッドチェーンのように書けると嬉しいなぁというアイディアから。思い立ったので自作。  
 作っているうちに気が付きましたが、インターネットを探すと素晴らしい先人の作品が既にありました...  
@@ -10,7 +13,7 @@ C#のメソッドチェーンのように書けると嬉しいなぁというア
 
 ___
 
-# 特徴
+## Features
 - Rangeから値を取得して、配列として処理して、Rangeに値を代入することを主に想定しています。
 - Getしたときにインスタンスをコピーして返します。
 - 配列の次元ごとにインテリセンスで表示される内容を分けたかったので、クラスも次元毎に分けました。
@@ -20,7 +23,7 @@ ___
 - 処理が高速というわけではない。
 
 
-# Sample
+## Sample Code
 ~~~
 Dim arr As New ArrayEx2
 Call arr.Init(Range("A1:E3").Value) _
