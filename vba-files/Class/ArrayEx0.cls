@@ -9,53 +9,57 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-' -------------------------------------------------------------------------
-' Get method : return new instance.
-' Set method : return updated current instance.
-' Unexpected error, ArrayEx should return instance but null value.
-' -------------------------------------------------------------------------
+' ------------------------------------------------------------------------------------------------------------
+' Init methods              : should be initialize by array.
+' Convert methods           : should return other type object.
+' DebugPrint                : should return current instance. print current array value in immediate window.
+' Wrap default functions    : should return new instance.
+' ------------------------------------------------------------------------------------------------------------
 
-' Fields ------------------------------------------------------------------------------
+' Fields -----------------------------------------------------------------------------------------------------
 Private array_ As Variant
 
-' Properties -------------------------------------------------------------------------
+' Properties -------------------------------------------------------------------------------------------------
 Public Property Get Value()
 Attribute Value.VB_UserMemId = 0
     Value = array_
 End Property
 
+Public Property Let Value(val As Variant)
+    Init val
+End Property
+
+' [Hack] need to more good idea.
 ' for argument.  need for return value as ArrayEx0
 Public Property Get Mine()
     Set Mine = Me
 End Property
 
-
-' Public Methods --------------------------------------------------------------------
-Public Function Init(array0d) As ArrayEx0
+' Public Methods ---------------------------------------------------------------------------------------------
+Public Function Init(array0d As Variant) As ArrayEx0
     If IsArrayRank(array0d, 0) = False Then Call Err.Raise(101, "ArrayEx0 Init", "ArrayEx: Need 0d array (value)")
     array_ = array0d
     Set Init = Me
 End Function
 
 Public Function Create(Optional array0d As Variant) As ArrayEx0
-    If IsArrayRank(array0d, 0) = False Then Call Err.Raise(101, "ArrayEx0 Create", "ArrayEx: Need 0d array (value)")
+    If IsMissing(array0d) = True And IsEmpty(array_) Then Call Err.Raise(105, "ArrayEx0 Create", "ArrayEx: Not initialized")
     Dim rearr As New ArrayEx0
-    Set Create = IIf(IsMissing(array0d), rearr.Init(array_), rearr.Init(array0d))
+    If IsMissing(array0d) Then
+        Set Create = rearr.Init(array_)
+    Else
+        Set Create = rearr.Init(array0d)
+    End If
 End Function
 
 Public Function Equals(array0d) As Boolean
     Equals = (array_ = array0d)
 End Function
 
-
-
-'Set
-Public Function SetElement(argVal) As ArrayEx0
-    array_ = argVal
-    Set SetElement = Me
+' Convert
+Public Function ToString(Optional stringFormat As String) As String
+    ToString = CStr(array_)
 End Function
-
-'Range
 
 ' Debug
 Public Function DebugPrint() As ArrayEx0
@@ -63,40 +67,35 @@ Public Function DebugPrint() As ArrayEx0
     Set DebugPrint = Me
 End Function
 
-
 ' wrap default functions
-Public Function Replaced(before, after) As ArrayEx0
-    ' array_ type : string only
-    
+Public Function Replace(before As String, after As String) As ArrayEx0
     Dim rearr As New ArrayEx0
-    Dim re
-    re = Replace(array_, before, after)
-    Set Replaced = rearr.Init(re)
+    Set Replace = rearr.Init(Strings.Replace(array_, before, after))
 End Function
 
-Public Function ToString(Optional stringFormat As String) As ArrayEx0
+Public Function Left(length As Long) As ArrayEx0
     Dim rearr As New ArrayEx0
-    If IsMissing(stringFormat) Then Set ToString = rearr.Init(Format(array_, "@")) Else Set ToString = rearr.Init(Format(array_, stringFormat))
+    Set Left = rearr.Init(Strings.Left(array_, length))
 End Function
 
-Public Function ToLong() As ArrayEx0
+Public Function Right(length As Long) As ArrayEx0
     Dim rearr As New ArrayEx0
-    If IsNumeric(array_) Then Set ToLong = rearr.Init(CLng(array_)) Else Set ToLong = rearr.Init(Null)
+    Set Right = rearr.Init(Strings.Right(array_, length))
 End Function
 
-Public Function ToDouble() As ArrayEx0
+Public Function Mid(start As Long, Optional length As Long = 0) As ArrayEx0
     Dim rearr As New ArrayEx0
-    If IsNumeric(array_) Then Set ToDouble = rearr.Init(CDbl(array_)) Else Set ToDouble = rearr.Init(Null)
+    If length = 0 Then
+        Set Mid = rearr.Init(Strings.Mid(array_, start))
+    Else
+        Set Mid = rearr.Init(Strings.Mid(array_, start, length))
+    End If
 End Function
 
-Public Function ToDate() As ArrayEx0
-    Dim rearr As New ArrayEx0
-    If IsDate(array_) Then Set ToDate = rearr.Init(CDate(array_)) Else Set ToDate = rearr.Init(Null)
-End Function
+' [Hack] if need more, add
 
 
-
-' Private Methods ------------------------------------------------------------------
+' Private Methods --------------------------------------------------------------------------------------------
 Private Function IsArrayRank(inspectedArray As Variant, inspectedRank As Long) As Boolean
     Dim errTest As Long
     Dim i As Long: i = 0
@@ -109,3 +108,4 @@ Private Function IsArrayRank(inspectedArray As Variant, inspectedRank As Long) A
     IsArrayRank = ((i - 1) = inspectedRank)
     Exit Function
 End Function
+

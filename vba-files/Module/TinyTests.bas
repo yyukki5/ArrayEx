@@ -3,14 +3,16 @@ Option Explicit
 
 Sub RunTests()
     ' before using, switch error check in Tools > Options > General > Error trap
-    Debug.Print "--- Start tests ---"
+    Debug.Print "--- Start tests (" & Format(Now) & ") ---"
     
     RunTest "Init_NoException"
+    RunTest "Create_NoException"
     RunTest "GetValue_NoEception"
     RunTest "SetValue_GetMethodIsCorrect_NoException"
     RunTest "AddElement_NoException"
-    RunTest "ToCollection_NoException"
+    RunTest "Converts_NoException"
     '    RunTest "DebugPrint_NoException"
+    RunTest "WrapFunctions_NoException"
     RunTest "Array1Linqs_NoException"
     RunTest "Array2Linqs_NoException"
     
@@ -38,11 +40,9 @@ Private Function array1drow() As Variant
 End Function
 
 Private Function array1dHasDuplication() As Variant
-    Dim a:      a = array1d
-    a(3) = 2
+    Dim a:      a = array1d:      a(3) = 2
     array1dHasDuplication = a
 End Function
-
 
 Private Function array2d() As Variant
     Dim a
@@ -61,7 +61,6 @@ Private Function array2dDuplication() As Variant
     a(3, 2) = 4
     array2dDuplication = a
 End Function
-
 
 Sub Init_NoException()
     On Error Resume Next
@@ -92,13 +91,48 @@ Sub Init_NoException()
     
     If AssertTrue(a2d.Equals(array2d())) Then Else Exit Sub
 
-    Exit Sub
-errTest:
 End Sub
 
-Private Function abc(ByRef a2d As Object)
-    Dim a: a = a2d.Value(1, 1)
-End Function
+Sub Create_NoException()
+    On Error Resume Next
+    
+    Dim a0d As New ArrayEx0
+    Call a0d.Create
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    Call a0d.Init(1).Create(2)
+    If AssertHasNoError Then Else Exit Sub: Err.Clear
+    Call a0d.Create(1)
+    If AssertHasNoError Then Else Exit Sub: Err.Clear
+    Call a0d.Create(array1d())
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    Call a0d.Create(array2d())
+    If AssertHasError Then Else Exit Sub: Err.Clear
+       
+    Dim a1d As New ArrayEx1
+    Call a1d.Create
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    Call a1d.Init(array1d()).Create(array1d())
+    If AssertHasNoError Then Else Exit Sub: Err.Clear
+    Call a1d.Create(1)
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    Call a1d.Create(array1d())
+    If AssertHasNoError Then Else Exit Sub: Err.Clear
+    Call a1d.Create(array2d())
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    
+    Dim a2d As New ArrayEx2
+    Call a2d.Create
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    Call a2d.Init(array2d()).Create(array2d())
+    If AssertHasNoError Then Else Exit Sub: Err.Clear
+    Call a2d.Create(1)
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    Call a2d.Create(array1d())
+    If AssertHasError Then Else Exit Sub: Err.Clear
+    Call a2d.Create(array2d())
+    If AssertHasNoError Then Else Exit Sub: Err.Clear
+End Sub
+
 
 Sub GetValue_NoEception()
     On Error Resume Next
@@ -167,9 +201,9 @@ Sub SetValue_GetMethodIsCorrect_NoException()
     Call a1d.SetElement(1, 10)
     If AssertEqual(10, a1d(1)) Then Else Exit Sub
 
-    Call c0d.SetElement("sample")
+    c0d = "sample"
     If AssertEqual("sample", c0d) Then Else Exit Sub
-
+    
 End Sub
 
 Sub AddElement_NoException()
@@ -188,8 +222,11 @@ Sub AddElement_NoException()
 
 End Sub
 
-Sub ToCollection_NoException()
+Sub Converts_NoException()
     On Error Resume Next
+
+    Dim a0d As New ArrayEx0
+    If AssertEqual("123", a0d.Init(123).ToString) Then Else Exit Sub
 
     Dim a2d As New ArrayEx2
     Dim collect As Collection
@@ -204,6 +241,17 @@ Sub ToCollection_NoException()
 
 End Sub
 
+Sub WrapFunctions_NoException()
+    On Error Resume Next
+    
+    Dim a0d As New ArrayEx0
+    If AssertEqual("fuga", a0d.Init("hoge").Replace("h", "f").Replace("oge", "uga")) Then Else Exit Sub
+    If AssertEqual("323", a0d.Init(123).Replace("1", "3").ToString) Then Else Exit Sub
+    If AssertEqual("45", a0d.Init("123456789").Left(5).Right(4).Mid(2).Mid(2, 2)) Then Else Exit Sub
+
+End Sub
+
+
 Sub DebugPrint_NoException()
     On Error Resume Next
 
@@ -214,7 +262,6 @@ Sub DebugPrint_NoException()
     Call a2d.Extract("1:3", "2:5").DebugPrintAll.GetColumn(1).DebugPrintAll.GetElement(3).DebugPrint
    
 End Sub
-
 
 Sub Array1Linqs_NoException()
     On Error Resume Next
@@ -294,12 +341,6 @@ Sub Array2Linqs_NoException()
     If AssertEqual("[1,2,4,5]", a2dDuplication.Init(array2dDuplication).Distinct(2).GetColumn(1).ToString) Then Else Exit Sub
     
 End Sub
-    
-
-
-
-
-
 
 ' ----------------------------------------------------------------------------------------------------------------------
 Private Function RunTest(testName As String)
