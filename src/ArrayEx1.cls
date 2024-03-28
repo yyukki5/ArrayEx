@@ -42,22 +42,8 @@ End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array1d As Variant) As ArrayEx1
-'    Dim rearr
-'    Select Case ArrayExCore.Rank(array1d)
-'        Case 0
-'            ReDim rearr(0)
-'            rearr(0) = array1d
-'        Case 1
-'            rearr = array1d
-'        Case Else
-'           Call Err.Raise(1101, "ArrayEx1.Init", "ArrayEx: Need 1d array")
-'    End Select
-
-'    array_ = ArrayExCore.ConvertToDimensionN(array1d, 1)
-
     If ArrayExCore.Rank(array1d) <> 1 Then Call Err.Raise(1101, "ArrayEx1.Init", "ArrayEx: Need 1d array")
     array_ = array1d
-    
     Set Init = Me
 End Function
 
@@ -279,22 +265,8 @@ Public Function Average() As Variant
 End Function
 
 
-
-
-
-
 ' Private Methods ------------------------------------------------------------------
 Private Function ExtractCore(argIndexs As Variant) As ArrayEx1
-'    Dim rows, i As Long, ii As Long, re
-'
-'    rows = ArrayExCore.IndexToArray(argIndexs, Lb, Ub)
-'    ReDim re(Lb To UBound(rows) - LBound(rows) + Lb)
-'    ii = Lb
-'    For i = LBound(rows) To UBound(rows)
-'        re(ii) = array_(rows(i))
-'        ii = ii + 1
-'    Next i
-'    Dim rearr As New ArrayEx1
     Dim re, rearr As New ArrayEx1
     re = ArrayExCore.ExtractCore(array_, argIndexs)
     Set ExtractCore = rearr.Init(re)

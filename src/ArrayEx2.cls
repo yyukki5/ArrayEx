@@ -155,28 +155,18 @@ Public Function GetColumns(cols As Variant) As ArrayEx2
 End Function
 
 Function GetRow(row As Long) As ArrayEx1
-'    Dim re: re = ExtractCore(row, ":").Value
-'    Dim rre: ReDim rre(LBound(re, 2) To UBound(re, 2))
-'    Dim i As Long
-'    For i = LBound(re, 2) To UBound(re, 2):           rre(i) = re(LBound(re, 1), i):    Next i
-'    Dim rearr As New ArrayEx1
-'    Set GetRow = rearr.Init(rre)
-
     Dim re, rearr As New ArrayEx1
+    
     re = ArrayExCore.ConvertToDimensionN(ExtractCore(row, ":").Value, 1)
+    
     Set GetRow = rearr.Init(re)
-
 End Function
 
 Public Function GetColumn(col As Long) As ArrayEx1
-'    Dim re: re = ExtractCore(":", col).Value
-'    Dim rre: ReDim rre(LBound(re, 1) To UBound(re, 1))
-'    Dim i As Long: For i = LBound(re, 1) To UBound(re, 1): rre(i) = re(i, LBound(re, 2)): Next i
-'    Dim rearr As New ArrayEx1
-'    Set GetColumn = rearr.Init(rre)
-
     Dim re, rearr As New ArrayEx1
+    
     re = ArrayExCore.ConvertToDimensionN(ExtractCore(":", col).Transpose.Value, 1)
+    
     Set GetColumn = rearr.Init(re)
 End Function
 
@@ -188,55 +178,11 @@ End Function
 
 ' Add
 Function AddRow(rowArrayEx1 As ArrayEx1) As ArrayEx2
-'    Dim i, j
-'    Dim re
-'    If IsEmpty(array_) Then
-'        ReDim re(1 To 1, row.lb To row.ub)
-'        For j = LBound(re, 2) To UBound(re, 2)
-'            re(1, j) = row(j)
-'        Next j
-'    Else
-'        Dim maxCol As Long
-'        maxCol = IIf(ub(2) > row.ub, ub(2), row.ub)
-'
-'        ReDim re(lb To ub + 1, lb(2) To maxCol)
-'        For i = lb To ub
-'            For j = lb(2) To ub(2)
-'                re(i, j) = array_(i, j)
-'            Next j
-'        Next i
-'        For j = lb(2) To maxCol
-'            re(ub + 1, j) = row(j)
-'        Next j
-'    End If
-   
     Dim rearr As New ArrayEx2
     Set AddRow = rearr.InitForce(ArrayExCore.VSTACK(array_, rowArrayEx1.Value))
 End Function
 
 Function AddColumn(colArrayEx1 As ArrayEx1) As ArrayEx2
-'    Dim i, j
-'    Dim re
-'    If IsEmpty(array_) Then
-'        ReDim re(col.lb To col.ub, 1 To 1)
-'        For j = LBound(re, 2) To UBound(re, 2)
-'            re(j, 1) = col(j)
-'        Next j
-'    Else
-'        Dim maxRow As Long
-'        maxRow = IIf(ub(1) > col.ub, ub(1), col.ub)
-'
-'        ReDim re(lb To maxRow, lb(2) To ub(2) + 1)
-'        For i = lb To ub
-'            For j = lb(2) To ub(2)
-'                re(i, j) = array_(i, j)
-'            Next j
-'        Next i
-'        For j = lb(1) To maxRow
-'            re(j, ub(2) + 1) = col(j)
-'        Next j
-'    End If
-
     Dim rearr As New ArrayEx2
     Set AddColumn = rearr.InitForce(ArrayExCore.HSTACK(array_, colArrayEx1.Value))
 End Function
@@ -395,24 +341,10 @@ End Function
 
 ' Private Methods --------------------------------------------------------------------------------------------
 Private Function ExtractCore(argRows As Variant, argCols As Variant) As ArrayEx2
-'    Dim rows, cols, i, j, ii, jj, re
-'    Dim rearr As New ArrayEx2
-'
-'    rows = ArrayExCore.IndexToArray(argRows, Lb(1), Ub(1))
-'    cols = ArrayExCore.IndexToArray(argCols, Lb(2), Ub(2))
-'
-'    ReDim re(Lb(1) To UBound(rows) - LBound(rows) + Lb(1), Lb(2) To UBound(cols) - LBound(cols) + Lb(2))
-'    ii = Lb(1)
-'    For i = LBound(rows) To UBound(rows)
-'        jj = Lb(2)
-'        For j = LBound(cols) To UBound(cols)
-'            re(ii, jj) = array_(rows(i), cols(j))
-'            jj = jj + 1
-'        Next j
-'        ii = ii + 1
-'    Next i
     Dim re, rearr As New ArrayEx2
+    
     re = ArrayExCore.ExtractCore(array_, argRows, argCols)
+    
     Set ExtractCore = rearr.Init(re)
 End Function
 

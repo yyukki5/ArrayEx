@@ -1,5 +1,6 @@
 ###############################################################################
 # Not using default behavior to automatically normalize line endings.
+# And change [core] autocrlf = false in confing in .git.
 # To be usable .cls file as class module by download zip from GitHub.
 # Reason: 
 #  When downloading files as zip from GitHub (Not fetch), line endings is LF. 
