@@ -1,13 +1,15 @@
 # ArrayEx
 GitHubの練習と、最近勉強したVBAの練習と、作ったものがアウトプットされないと気が済まない気がしてきたというレポジトリ  
 
-- ArrayEx (本体)    : vba-files > Class  
+- ArrayEx (本体)    : src
+    - ArrayExCore.cls
     - ArrayEx0.cls 
     - ArrayEx1.cls
     - ArrayEx2.cls
-- Test, Sample      : vba-files > Module, and ArrayEx.xlsm 
+- Test, Sample
 
-C#のメソッドチェーンのように書けると嬉しいなぁというアイディアから。思い立ったので自作。  
+C#のメソッドチェーンのように書けると嬉しいなぁというアイディアから。思い立ったので自作。
+また、CHOOSEROW, VSTACK, HSTACKなどの関数が使いたいなぁと思ったので自作。
 作っているうちに気が付きましたが、インターネットを探すと素晴らしい先人の作品が既にありました...  
 ただし、これは趣味のプログラムなので、なにかが優れているということは求めていません...  
 
@@ -18,6 +20,7 @@ C#のメソッドチェーンのように書けると嬉しいなぁというア
 - Rangeから値を取得して、配列として処理して、Rangeに値を代入することを主に想定しています。
 - Getしたときにインスタンスをコピーして返します。
 - 配列の次元ごとにインテリセンスで表示される内容を分けたかったので、クラスも次元毎に分けました。
+- ArrayExCoreは単独で使用可能。ArrayEx0,1,2はArrayExCoreに依存します。
 - ArrayEx1 はArrayEx0 に依存。ArrayEx2 はArrayEx0, ArrayEx1 に依存します。
 - MATLABっぽい感じで要素を指定できると個人的に嬉しいので、":"　や "To" でGet出来るようにしました。
 - LinqっぽいMethodはいくつかを抜粋して実装しました。
