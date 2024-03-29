@@ -30,36 +30,35 @@ End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array0d As Variant) As ArrayEx0
-'    If ArrayExCore.Rank(array0d) = 0 Then
-'        array_ = array0d
-'    Else
-'        Call Err.Raise(101, "ArrayEx0 Init", "ArrayEx: Need 0d array (value)")
-'    End If
-
-'    array_ = ArrayExCore.ConvertToDimensionN(array0d, 0)
-
-    If ArrayExCore.Rank(array0d) <> 0 Then Call Err.Raise(101, "ArrayEx0 Init", "ArrayEx: Need 0d array (value)")
+    ArrayExCore.Validate array0d
+    If ArrayExCore.Rank(array0d) <> 0 Then Call Err.Raise(1001, "ArrayEx0.Init", "ArrayEx: Need 0d array (value)")
     array_ = array0d
     Set Init = Me
 End Function
 
-Public Function Create(Optional array0d As Variant) As ArrayEx0
-    If IsMissing(array0d) = True And IsEmpty(array_) Then Err.Raise 105, "ArrayEx0 Create", "ArrayEx: Not initialized"
-    Dim rearr As New ArrayEx0
-    If IsMissing(array0d) Then
-        Set Create = rearr.Init(array_)
-    Else
-        Set Create = rearr.Init(array0d)
-    End If
+Public Function InitForce(arr As Variant) As ArrayEx0
+    array_ = ArrayExCore.ConvertToDimensionN(arr, 0)
+    Set InitForce = Me
 End Function
 
-Public Function Equals(array0d) As Boolean
-    Equals = (array_ = array0d)
+'' todo delete ?
+'Public Function Create(Optional array0d As Variant) As ArrayEx0
+'    If IsMissing(array0d) = True And IsEmpty(array_) Then Err.Raise 105, "ArrayEx0 Create", "ArrayEx: Not initialized"
+'    Dim rearr As New ArrayEx0
+'    If IsMissing(array0d) Then
+'        Set Create = rearr.Init(array_)
+'    Else
+'        Set Create = rearr.Init(array0d)
+'    End If
+'End Function
+
+Public Function Equals(arrayEx0d As ArrayEx0) As Boolean
+    Equals = (array_ = arrayEx0d.Value)
 End Function
 
 ' Convert
-Public Function ToString(Optional stringFormat As String) As String
-    ToString = CStr(array_)
+Public Function ToString(Optional formatText As String = "", Optional FirstDayOfWeek As Long = vbSunday, Optional FirstWeekOfYear As Long = vbFirstJan1) As String
+    ToString = Format(CStr(array_), formatText, FirstDayOfWeek, FirstWeekOfYear)
 End Function
 
 ' Debug

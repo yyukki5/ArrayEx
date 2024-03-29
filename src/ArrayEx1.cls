@@ -28,6 +28,10 @@ Public Property Get Value()
     Value = array_
 End Property
 
+Public Property Let Value(array1d)
+    Init array1d
+End Property
+
 Public Property Get ub()
     ub = UBound(array_, 1)
 End Property
@@ -42,30 +46,39 @@ End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array1d As Variant) As ArrayEx1
+    ArrayExCore.Validate array1d
     If ArrayExCore.Rank(array1d) <> 1 Then Call Err.Raise(1101, "ArrayEx1.Init", "ArrayEx: Need 1d array")
     array_ = array1d
     Set Init = Me
 End Function
 
-Public Function Create(Optional array1d As Variant) As ArrayEx1
-    If IsMissing(array1d) = True And IsEmpty(array_) Then Call Err.Raise(1105, "ArrayEx1 Create", "ArrayEx: Not initialized")
-    Dim rearr As New ArrayEx1
-    If IsMissing(array1d) Then
-        Set Create = rearr.Init(array_)
-    Else
-        Set Create = rearr.Init(array1d)
-    End If
+Public Function InitForce(arr As Variant) As ArrayEx1
+    array_ = ArrayExCore.ConvertToDimensionN(arr, 1)
+    Set InitForce = Me
 End Function
 
-Public Function Equal(array1d) As Boolean
-    Equal = False
+
+'' todo delete ?
+'Public Function Create(Optional array1d As Variant) As ArrayEx1
+'    If IsMissing(array1d) = True And IsEmpty(array_) Then Call Err.Raise(1105, "ArrayEx1 Create", "ArrayEx: Not initialized")
+'    Dim rearr As New ArrayEx1
+'    If IsMissing(array1d) Then
+'        Set Create = rearr.Init(array_)
+'    Else
+'        Set Create = rearr.Init(array1d)
+'    End If
+'End Function
+
+Public Function Equals(arrayEx1d As ArrayEx1) As Boolean
+    Equals = False
+    Dim array1d: array1d = arrayEx1d.Value
     If lb <> LBound(array1d) Then Exit Function
     If ub <> UBound(array1d) Then Exit Function
     Dim i As Long
     For i = lb To ub
         If array_(i) <> array1d(i) Then Exit Function
     Next i
-    Equal = True
+    Equals = True
 End Function
 
 ' Set
@@ -89,18 +102,10 @@ End Function
 
 ' Add
 Function AddElement(element As ArrayEx0) As ArrayEx1
-    Dim i, j
-    Dim re
-    If IsEmpty(array_) Then
-        ReDim re(1)
-        re(1) = element.Value
-    Else
-        ReDim re(lb To ub + 1)
-        For i = lb To ub
-            re(i) = array_(i)
-        Next i
-        re(ub + 1) = element.Value
-    End If
+    Dim re: re = array_
+    ReDim Preserve re(lb To ub + 1)
+    re(ub + 1) = element.Value
+    
     Dim rearr As New ArrayEx1
     Set AddElement = rearr.Init(re)
 End Function
@@ -108,25 +113,27 @@ End Function
 ' Convert
 Public Function ToString() As String
     Dim s As String, i As Long, j As Long
-    s = "["
+    s = "{"
     For i = lb To ub
         s = s & CStr(array_(i)) & ","
     Next i
-    s = Left(s, Len(s) - 1) & "]"
+    s = Left(s, Len(s) - 1) & "}"
     ToString = s
 End Function
 
-Public Function ToRange(rng As Range)
+Public Function ToRange(rng As Range) As Range
     rng.Resize(1, Count).Value = array_
+    Set ToRange = rng.Resize(1, Count)
 End Function
 
 Public Function ToCollection() As Collection
     Dim coll As New Collection
-    Dim arr As New ArrayEx0
-    
+    Dim arr As ArrayEx0
     Dim i As Long
+    
     For i = lb To ub
-        coll.Add arr.Create(array_(i))
+        Set arr = New ArrayEx0
+        coll.Add arr.Init(array_(i))
     Next i
 
     Set ToCollection = coll
@@ -154,17 +161,18 @@ Public Function Skip(skipIndex As Long) As ArrayEx1
     Set Skip = ExtractCore(lb + skipIndex & ":" & ub)
 End Function
 
-Public Function TAKE(skipIndex As Long) As ArrayEx1
-    Set TAKE = ExtractCore(lb & ":" & skipIndex - 1)
+Public Function TAKE(takeIndex As Long) As ArrayEx1
+    Set TAKE = ExtractCore(lb & ":" & takeIndex + lb - 1)
 End Function
 
 Public Function Distinct() As ArrayEx1
-    Dim re As New ArrayEx1
     Dim var As Variant
     Dim i As Long, s As String, sIndexes As String
+    Dim coll As New Collection
     For i = lb To ub
-        If InStr(s, array_(i)) = 0 Then
-            s = s & array_(i) & ","
+        If IsDuplicated(coll, array_(i)) Then
+        Else
+            coll.Add array_(i)
             sIndexes = sIndexes & i & ","
         End If
     Next i
@@ -197,6 +205,7 @@ Public Function AllEvaluate(argument As String, formula As String) As Boolean
     AllEvaluate = False
     Dim evaluation
     For Each evaluation In GetEvaluations(argument, formula)
+        If VarType(evaluation) <> vbBoolean Then Err.Raise 1101, "ArrayEx1.AllEvaluate()", "Should evaluated value boolean, but not boolean: " & evaluation
         If evaluation = False Then Exit Function
     Next
     AllEvaluate = True
@@ -206,6 +215,7 @@ Public Function AnyEvaluate(argument As String, formula As String) As Boolean
     AnyEvaluate = True
     Dim evaluation
     For Each evaluation In GetEvaluations(argument, formula)
+        If VarType(evaluation) <> vbBoolean Then Err.Raise 1101, "ArrayEx1.AllEvaluate()", "Should evaluated value boolean, but not boolean: " & evaluation
         If evaluation = True Then Exit Function
     Next
     AnyEvaluate = False
@@ -215,6 +225,7 @@ Public Function WhereEvaluated(argument As String, formula As String) As ArrayEx
     Dim evaluations, indexes As String, i As Long
     evaluations = GetEvaluations(argument, formula)
     For i = lb To ub
+        If VarType(evaluations(i)) <> vbBoolean Then Err.Raise 1101, "ArrayEx1.WhereEvaluated()", "Should evaluated value boolean, but not boolean: " & evaluations(i)
         If evaluations(i) Then indexes = indexes & i & ","
     Next i
     Set WhereEvaluated = ExtractCore(indexes)
@@ -278,9 +289,18 @@ Private Function GetEvaluations(argument As String, formula As String) As Varian
     For i = lb To ub
         s = Replace(formula, argument, array_(i))
         If ArrayExCore.TryEvaluate(s, re) Then rearr(i) = re _
-            Else Err.Raise 1003, "ArrayEx1, GetEvaluations()", "String in evaluate() is error :" & s & "."
+            Else Err.Raise 1003, "ArrayEx1.GetEvaluations()", "String in evaluate() is error :" & s & "."
     Next i
     GetEvaluations = rearr
 End Function
 
-
+Private Function IsDuplicated(coll As Collection, val) As Boolean
+    Dim col
+    On Error GoTo errEqual
+    IsDuplicated = True
+    For Each col In coll
+        If col = val Then Exit Function:
+    Next
+    IsDuplicated = False
+errEqual:
+End Function

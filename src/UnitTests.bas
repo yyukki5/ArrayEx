@@ -7,19 +7,21 @@ Sub RunTests()
 
     Set test_ = New UnitTest
 
-    test_.RegisterTest "Init_NoException"
-    test_.RegisterTest "Create_NoException"
-    test_.RegisterTest "GetValue_NoEception"
-    test_.RegisterTest "SetValue_GetMethodIsCorrect_NoException"
-    test_.RegisterTest "AddElement_NoException"
-    test_.RegisterTest "Converts_NoException"
+    test_.RegisterTest "Test_012_Init"
+    test_.RegisterTest "Test_012_Equals"
+    test_.RegisterTest "Test_012_GetValue"
+    test_.RegisterTest "Test_012_SetValue_GetMethod"
+    test_.RegisterTest "Test_012_AddElementRowColumn"
+    test_.RegisterTest "Test_012_ToString"
+    test_.RegisterTest "Test_012_ToCollection"
+    test_.RegisterTest "Test_012_ToRange"
     '    test_.RegisterTest "DebugPrint_NoException"
-    test_.RegisterTest "WrapFunctions_NoException"
-    test_.RegisterTest "Array1Linqs_NoException"
-    test_.RegisterTest "Array2Linqs_NoException"
+    test_.RegisterTest "Test_Ex1_Linqs"
+    test_.RegisterTest "Test_Ex2_Linqs"
     
 
 '    test_.RegisterTest "Test_Test"
+    test_.RegisterTest "Test_Core_Validate"
     test_.RegisterTest "Test_Core_RedimPreserve2"
     test_.RegisterTest "Test_Core_ShiftIndex"
     test_.RegisterTest "Test_Core_ConvertToDimensionN"
@@ -59,6 +61,25 @@ Sub Test_Test()
     Err.Clear
     test_.AssertHasNoError
     
+End Sub
+
+Sub Test_Core_Validate()
+    Dim ar As Variant, emptyVal As Variant, obj As Object
+    
+    On Error Resume Next
+    
+    ArrayExCore.Validate array1d
+    test_.AssertHasNoError
+    ArrayExCore.Validate Empty
+    test_.AssertHasError
+    ArrayExCore.Validate CVErr(xlErrNA)
+    test_.AssertHasError
+    ArrayExCore.Validate Null
+    test_.AssertHasError
+    ArrayExCore.Validate obj
+    test_.AssertHasError
+    ArrayExCore.Validate Nothing
+    test_.AssertHasError
 End Sub
 
 Sub Test_Core_GetSpllingRange()
@@ -230,7 +251,7 @@ Sub Test_Core_TAKE_DROP()
     ar = array2d
     
     arr = ArrayExCore.TAKE(ar, -3, 1)
-    test_.AssertEqual "[3;4;5]", aex.Init(arr).ToString
+    test_.AssertEqual "{3;4;5}", aex.Init(arr).ToString
     
     arr = ArrayExCore.TAKE(ar, 0, -2)
     test_.AssertTrue IsError(arr)
@@ -251,31 +272,106 @@ Sub Test_Core_TAKE_DROP()
 
 End Sub
 
-Sub Init_NoError()
-    Dim arr
-    Dim a2 As New ArrayEx2
-    arr = array2d()
-    a2.Init arr
-    
-    With test_
-        .AssertEqual 1, a2.lb(1)
-        .AssertEqual 1, a2.lb(2)
-    End With
+'Sub Test_012_Init()
+'    Dim arr
+'    Dim a2 As New ArrayEx2
+'    arr = array2d()
+'    a2.Init arr
+'
+'    On Error Resume Next
+'    With test_
+'        a2.Init (array2d())
+'        .AssertHasNoError
+'        .AssertEqual 1, a2.lb(1)
+'        .AssertEqual 5, a2.ub(1)
+'        .AssertEqual 1, a2.lb(2)
+'        .AssertEqual 10, a2.ub(2)
+'        a2.Init (Empty)
+'        .AssertHasError
+'        a2.Init (Null)
+'        .AssertHasError
+'        a2.Init (Nothing)
+'        .AssertHasError
+'
+'
+'        .AssertEqual 1, a2.lb(1)
+'        .AssertEqual 1, a2.lb(2)
+'    End With
+'
+'    a2.Init array1d()
+'    test_.AssertEqual 0, a2.lb
+'
+'    a2.Init 3
+'    test_.AssertEqual 0, a2.lb
+'
+'
+'    Dim re
+'    a2.Init array2d()
+'    re = a2.GetRow(2).Value
+'    test_.AssertEqual 10, UBound(re)
+'End Sub
 
-    a2.Init array1d()
-    test_.AssertEqual 0, a2.lb
+Sub Test_012_Equals()
+    Dim a0d1  As New ArrayEx0, a0d2 As New ArrayEx0
+    Dim a1d1  As New ArrayEx1, a1d2 As New ArrayEx1
+    Dim a2d1  As New ArrayEx2, a2d2 As New ArrayEx2
     
-    a2.Init 3
-    test_.AssertEqual 0, a2.lb
+    a0d1.Init (1)
+    a0d2.Init (1)
+    a1d1.Init (array1d())
+    a1d2.Init (array1d())
+    a2d1.Init (array2d())
+    a2d2.Init (array2d())
     
-    
-    Dim re
-    a2.Init array2d()
-    re = a2.GetRow(2).Value
-    test_.AssertEqual 10, UBound(re)
+    test_.AssertEqual a0d1, a0d2
+    test_.AssertEqual a1d1, a1d2
+    test_.AssertEqual a2d1, a2d2
 End Sub
 
 
+Sub Test_012_Init()
+    On Error Resume Next
+
+    With test_
+        Dim a0d As New ArrayEx0
+        a0d.Init (1)
+        .AssertHasNoError
+        a0d.Init (array1d)
+        .AssertHasError
+        a0d.Init (array2d)
+        .AssertHasError
+        
+        Dim a1d As New ArrayEx1
+        a1d.Init (1)
+        .AssertHasError
+        a1d.Init (array1d())
+        .AssertHasNoError
+        .AssertEqual 1, a1d.lb
+        .AssertEqual 5, a1d.ub
+        a1d.Init (array2d())
+        .AssertHasError
+        
+        Dim a2d As New ArrayEx2
+        a2d.Init (1)
+        .AssertHasError
+        a2d.Init (array1d())
+        .AssertHasError
+        a2d.Init (array2d())
+        .AssertHasNoError
+        .AssertEqual 1, a2d.lb(1)
+        .AssertEqual 5, a2d.ub(1)
+        .AssertEqual 1, a2d.lb(2)
+        .AssertEqual 10, a2d.ub(2)
+        
+        a2d.Init (Empty)
+        .AssertHasError
+        a2d.Init (Null)
+        .AssertHasError
+        a2d.Init Nothing
+        .AssertHasError
+    End With
+
+End Sub
 
 Sub Test_Core_EXPAND()
     Dim a2, a2_, a1, a0
@@ -360,6 +456,289 @@ Sub Test_Core_WRAPROW()
     test_.AssertEqual CVErr(xlErrNum), arr
 End Sub
 
+
+Sub Test_2D_ShiftIndex_()
+    Dim a2d As New ArrayEx2, a2d1 As ArrayEx2, a2d2 As ArrayEx2
+    a2d.Init array2d()
+    
+    Set a2d1 = a2d.ShiftIndex(-1, -1)
+    Set a2d2 = a2d.ShiftIndex(1, 2)
+    
+    With test_
+        .AssertEqual 0, a2d1.lb
+        .AssertEqual 0, a2d1.lb(2)
+        .AssertEqual 2, a2d2.lb(1)
+        .AssertEqual 3, a2d2.lb(2)
+    End With
+End Sub
+
+'
+'Sub Create_NoException()
+'    On Error Resume Next
+'
+'    Dim a0d As New ArrayEx0
+'    a0d.Create
+'    test_.AssertHasError
+'    a0d.Init(1).Create (2)
+'    test_.AssertHasNoError
+'    a0d.Create (1)
+'    test_.AssertHasNoError
+'    a0d.Create (array1d())
+'    test_.AssertHasError
+'    a0d.Create (array2d())
+'    test_.AssertHasError
+'
+'    Dim a1d As New ArrayEx1
+'    a1d.Create
+'    test_.AssertHasError
+'    a1d.Init(array1d()).Create (array1d())
+'    test_.AssertHasNoError
+'    a1d.Create (1)
+'    test_.AssertHasError
+'    a1d.Create (array1d())
+'    test_.AssertHasNoError
+'    a1d.Create (array2d())
+'    test_.AssertHasError
+'
+'    Dim a2d As New ArrayEx2
+'    a2d.Create
+'    test_.AssertHasError
+'    a2d.Init(array2d()).Create (array2d())
+'    test_.AssertHasNoError
+'    a2d.Create (1)
+'    test_.AssertHasError
+'    a2d.Create (array1d())
+'    test_.AssertHasError
+'    a2d.Create (array2d())
+'    test_.AssertHasNoError
+'End Sub
+
+
+Sub Test_012_GetValue()
+    On Error Resume Next
+
+    Dim a2d As New ArrayEx2
+    a2d.Init (array2d())
+    test_.AssertFalse IsNull(a2d.Value)
+    test_.AssertEqual "{1,2,3}", a2d.Extract(1, "1:3").ToString()
+    test_.AssertEqual "{1,2,3}", a2d.Extract(1, "1 To 3").ToString()
+    test_.AssertEqual "{1,2,3}", a2d.Extract(1, "1,2,3").ToString()
+    test_.AssertEqual "{1,2,3;2,4,6}", a2d.Extract("1:2", "1:3").ToString()
+
+    a2d.Extract(1, ":3").ToString
+    test_.AssertHasError
+
+    Dim a1d As New ArrayEx1
+    a1d.Init (array1d())
+    test_.AssertFalse IsNull(a1d.Value)
+    test_.AssertEqual 1, a1d.Value(1)
+    test_.AssertEqual 2, a1d.Value("1:3")(2)
+    test_.AssertEqual 3, a1d.Value("1:3")(3)
+    test_.AssertEqual 3, UBound(a1d.Value("1:3"))
+    test_.AssertEqual "{1,2,3}", a1d.GetElements("1,2,3").ToString
+    test_.AssertEqual "{1,2,3}", a1d.GetElements("1 to 3").ToString
+    test_.AssertEqual "{1,2,3}", a1d.GetElements("1:3").ToString
+    test_.AssertEqual "{1,2,3,4,5}", a1d.GetElements(":").ToString
+
+    Dim a0d As New ArrayEx0
+    a0d.Init (1)
+    test_.AssertFalse IsNull(a0d.Value)
+    test_.AssertEqual 1, a0d.Value
+
+End Sub
+
+Sub Test_012_SetValue_GetMethod()
+    On Error Resume Next
+
+    Dim a2d As New ArrayEx2
+    Dim a1d As New ArrayEx1
+    Dim b1d As New ArrayEx1
+    Dim c0d As New ArrayEx0
+    
+    a2d.Init (array2d())
+    a1d.Init (array1drow())
+    b1d.Init (array1d())
+    c0d.Init ("test")
+ 
+    Call a2d.SetElement(1, 1, 10)
+    test_.AssertEqual 10, a2d(1, 1)
+    Call a2d.SetRow(1, a1d)
+    test_.AssertTrue a2d.GetRow(1).Equals(a1d)
+    Call a2d.SetColumn(1, b1d)
+    test_.AssertTrue a2d.GetColumn(1).Equals(b1d)
+
+    Call a1d.SetElement(1, 10)
+    test_.AssertEqual 10, a1d(1)
+
+    c0d.Value = "sample"
+    test_.AssertEqual "sample", c0d.Value
+End Sub
+
+Sub Test_012_AddElementRowColumn()
+    Dim a2d As New ArrayEx2, a2dAdded As ArrayEx2
+    Dim a1d As New ArrayEx1, a1dEmpty As ArrayEx1
+    Dim a0d As New ArrayEx0
+    
+    a0d.Init (10)
+    Set a1d = a1d.Init(array1d()).AddElement(a0d)
+    a2d.Init (array2d())
+    Set a2d = a2d.AddRow(a2d.GetRow(1)).AddColumn(a2d.GetColumn(1))
+    
+    test_.AssertEqual 6, a1d.ub
+    test_.AssertEqual 6, a2d.ub(1)
+    test_.AssertEqual 11, a2d.ub(2)
+End Sub
+
+
+Sub Test_012_ToString()
+    Dim a0d As New ArrayEx0
+    Dim a1d As New ArrayEx1
+    Dim a2d As New ArrayEx2
+    
+    Dim aaa
+    aaa = [{1,2,3;4,5,6}]
+    
+    With test_
+       .AssertEqual "abc", a0d.Init("abc").ToString()
+       .AssertEqual "2023/10/01", a0d.Init(45200).ToString("yyyy/mm/dd")
+       .AssertEqual "00123", a0d.Init(123).ToString("00000")
+       .AssertEqual "", a0d.Init("").ToString()
+        
+       .AssertEqual "{1,2,3,4,5}", a1d.Init(array1d()).ToString()
+       .AssertEqual "{1,2,3;2,4,6;3,6,9}", a2d.Init(array2d()).Extract("1:3", "1:3").ToString()
+    End With
+End Sub
+
+Sub Test_012_ToCollection()
+    Dim collect1 As Collection, collect2 As Collection
+    Dim a0d As New ArrayEx0, a1d As New ArrayEx1, a2d As New ArrayEx2
+    
+    Set collect1 = a1d.Init(array1d()).ToCollection()
+    test_.AssertEqual 5, collect1.Count
+    test_.AssertEqual 1, collect1.Item(1).Value
+    
+    Set collect2 = a2d.Init(array2d()).ToCollection(1)
+    test_.AssertEqual 5, collect2.Count
+    test_.AssertEqual "{1,2,3,4,5,6,7,8,9,10}", collect2.Item(1).ToString()
+    
+    Set collect2 = a2d.Init(array2d()).ToCollection(2)
+    test_.AssertEqual 10, collect2.Count
+    test_.AssertEqual "{2,4,6,8,10}", collect2(2).ToString()
+    
+    Set collect2 = a2d.Init(array2d()).ToCollection(0)
+    test_.AssertEqual 50, collect2.Count
+    Set collect2 = a2d.Init(array2d()).ToCollection(100)
+    test_.AssertEqual 50, collect2.Count
+End Sub
+
+Sub Test_012_ToRange()
+    Dim a0d As New ArrayEx0, a1d As New ArrayEx1, a2d As New ArrayEx2
+    Dim rng1 As Range, rng2 As Range
+    Set rng1 = a1d.Init(array1d()).ToRange(Range("A1"))
+    Set rng2 = a2d.Init(array2d()).ToRange(Range("A1"))
+    test_.AssertEqual "$A$1:$E$1", rng1.Address
+    test_.AssertEqual "$A$1:$J$5", rng2.Address
+End Sub
+
+Sub Test_Array0_StringsFunctions_NoException()
+    Dim a0d As New ArrayEx0
+    test_.AssertEqual "fuga", a0d.Init("hoge").Replace("h", "f").Replace("oge", "uga").ToString
+    test_.AssertEqual "323", a0d.Init(123).Replace("1", "3").ToString
+    test_.AssertEqual "45", a0d.Init("123456789").Left(5).Right(4).Mid(2).Mid(2, 2).Value
+End Sub
+
+Sub Test_012_DebugPrint_NoTest()
+    Dim a2d As New ArrayEx2
+'    Dim a1d As New ArrayEx1
+'    Dim a0d As New ArrayEx0
+    
+    a2d.Init (array2d())
+    a2d.DebugPrint("{x}, {y}", "1,4", "no1 : {x}, no4:{y}").GetRow(1).DebugPrint ("Test:{x}")
+    a2d.Extract("1:3", "2:5").DebugPrintAll.GetColumn(1).DebugPrintAll.GetElement(3).DebugPrint
+End Sub
+
+Sub Test_Ex1_Linqs()
+    On Error Resume Next
+    
+    Dim a1d As New ArrayEx1
+    a1d.Init (array1d())
+        
+    With test_
+        .AssertTrue a1d.Contains(4)
+        .AssertEqual 1, a1d.Min()
+        .AssertEqual 5, a1d.Max()
+        
+        .AssertEqual 1, a1d.First().Value
+        .AssertEqual 5, a1d.Last().Value
+    
+        .AssertEqual "{3,4,5}", a1d.Skip(2).ToString()
+        .AssertEqual "{1,2,3}", a1d.TAKE(3).ToString()
+        .AssertEqual "{1,2,3,4,5}", a1d.OrderBy().ToString()
+        .AssertEqual "{5,4,3,2,1}", a1d.OrderByDescending().ToString()
+        .AssertEqual "{5,4,3,2,1}", a1d.Reverse().ToString()
+    
+        .AssertEqual "{4,5}", a1d.WhereEvaluated("x", "x > 3").ToString()
+        a1d.WhereEvaluated "x", "y>3"
+        .AssertEqual 1003, Err.Number
+        a1d.WhereEvaluated "x", "x + 3"
+        .AssertEqual 1101, Err.Number
+        a1d.WhereEvaluated "x", "x  & ""Hello"" "
+        .AssertHasError
+        
+        .AssertEqual "{4,7,12,19,28}", a1d.SelectEvaluated("{x}", "{x}^2+ 3").ToString()
+        .AssertEqual "{1a,2a,3a,4a,5a}", a1d.SelectEvaluated("x", "x &""a""").ToString()
+        .AssertEqual "{Abc,Abc,Abc,Abc,Abc}", a1d.SelectEvaluated("x", "proper(""abc"") ").ToString()
+    
+        .AssertTrue a1d.AllEvaluate("x", "x > 0 ")
+        .AssertFalse a1d.AllEvaluate("x", "x > 1 ")
+        a1d.AllEvaluate "x", "x & ""Hello"""
+        .AssertEqual 1101, Err.Number
+        a1d.AllEvaluate "x", "x + 0"
+        .AssertEqual 1101, Err.Number
+        
+        .AssertTrue a1d.AnyEvaluate("x", "x > 4 ")
+        .AssertFalse a1d.AnyEvaluate("x", "x > 5 ")
+    
+        .AssertEqual "{1,2,4,5}", a1d.Init([{1,2,2,4,5}]).Distinct.ToString()
+        .AssertEqual "{hoge,fuga}", a1d.Init([{"hoge","fuga","fuga","hoge" }]).Distinct.ToString()
+    End With
+    
+End Sub
+
+Sub Test_Ex2_Linqs()
+    On Error Resume Next
+    
+    Dim a2d As New ArrayEx2
+    a2d.Init (array2d())
+        
+    With test_
+        a2d.WhereEvaluated "x,y,z", "1,2", "x+y=3"
+        .AssertEqual 2002, Err.Number
+        a2d.WhereEvaluated "x,y", "1,2,3", "x+y=3"
+        .AssertEqual 2002, Err.Number
+        
+        .AssertEqual 1, a2d.WhereEvaluated("x,y", "0,1", "x+y=3").Count
+        .AssertEqual "{4,8,12,16,20}", a2d.SelectEvaluated("x,y", "0,2", "x+y").ToString
+        .AssertEqual "{1,2,3,4,5}", a2d.SelectEvaluated("x", "0", "x").ToString
+        .AssertFalse a2d.AllEvaluate("x", "2", "x>=3")
+        .AssertTrue a2d.AnyEvaluate("x", "2", "x>3")
+    
+        .AssertEqual "{1,2,3,4,5,6,7,8,9,10}", a2d.First.ToString()
+        .AssertEqual "{5,10,15,20,25,30,35,40,45,50}", a2d.Last.ToString()
+    
+        .AssertEqual 4, a2d.Skip(1).Count
+        .AssertEqual 3, a2d.TAKE(3).Count
+        .AssertEqual "{1,2,3,4,5}", a2d.OrderBy(1).GetColumn(0).ToString()
+        .AssertEqual "{5,4,3,2,1}", a2d.OrderByDescending(1).GetColumn(0).ToString()
+        .AssertEqual a2d.ToString(), a2d.Reverse.Reverse.ToString()
+    
+        Dim a2dDuplication As New ArrayEx2
+        .AssertEqual "{1,2,4,5}", a2dDuplication.Init(array2dDuplication).Distinct(1).GetColumn(0).ToString
+    End With
+End Sub
+
+' ----------------------------------------------------------------------------------------------------------------------
+
 Private Function array1d() As Variant
     Dim a
     ReDim a(1 To 5)
@@ -431,347 +810,7 @@ End Function
 Private Function textWithColumnRowDelimiters() As String
     textWithColumnRowDelimiters = "1,2,3;4,5,6;a,b,c"
 End Function
+
 Private Function textWithColumnRowDelimiters2() As String
     textWithColumnRowDelimiters2 = "1,2:3::4;4,5,6/;;a,B,ab"
 End Function
-
-Sub Test_2D_ShiftIndex_()
-    Dim a2d As New ArrayEx2, a2d1 As ArrayEx2, a2d2 As ArrayEx2
-    a2d.Init array2d()
-    
-    Set a2d1 = a2d.ShiftIndex(-1, -1)
-    Set a2d2 = a2d.ShiftIndex(1, 2)
-    
-    With test_
-        .AssertEqual 0, a2d1.lb
-        .AssertEqual 0, a2d1.lb(2)
-        .AssertEqual 2, a2d2.lb(1)
-        .AssertEqual 3, a2d2.lb(2)
-    End With
-End Sub
-
-Sub Init_NoException()
-    On Error Resume Next
-
-    With test_
-        Dim a0d As New ArrayEx0
-        a0d.Init (1)
-        .AssertHasNoError
-        a0d.Init (array1d)
-        .AssertHasError
-        a0d.Init (array2d)
-        .AssertHasError
-        
-        Dim a1d As New ArrayEx1
-        a1d.Init (1)
-        .AssertHasError
-        a1d.Init (array1d)
-        .AssertHasNoError
-        a1d.Init (array2d)
-        .AssertHasError
-        
-        Dim a2d As New ArrayEx2
-        a2d.Init (1)
-        .AssertHasError
-        a2d.Init (array1d())
-        .AssertHasError
-        .AssertEqual 0, a2d.lb(1)
-        a2d.Init (array2d())
-        .AssertHasNoError
-        
-        .AssertTrue (a2d.Equals(array2d()))
-    End With
-
-End Sub
-
-Sub Create_NoException()
-    On Error Resume Next
-    
-    Dim a0d As New ArrayEx0
-    a0d.Create
-    test_.AssertHasError
-    a0d.Init(1).Create (2)
-    test_.AssertHasNoError
-    a0d.Create (1)
-    test_.AssertHasNoError
-    a0d.Create (array1d())
-    test_.AssertHasError
-    a0d.Create (array2d())
-    test_.AssertHasError
-       
-    Dim a1d As New ArrayEx1
-    a1d.Create
-    test_.AssertHasError
-    a1d.Init(array1d()).Create (array1d())
-    test_.AssertHasNoError
-    a1d.Create (1)
-    test_.AssertHasError
-    a1d.Create (array1d())
-    test_.AssertHasNoError
-    a1d.Create (array2d())
-    test_.AssertHasError
-    
-    Dim a2d As New ArrayEx2
-    a2d.Create
-    test_.AssertHasError
-    a2d.Init(array2d()).Create (array2d())
-    test_.AssertHasNoError
-    a2d.Create (1)
-    test_.AssertHasError
-    a2d.Create (array1d())
-    test_.AssertHasError
-    a2d.Create (array2d())
-    test_.AssertHasNoError
-End Sub
-
-
-Sub GetValue_NoEception()
-    On Error Resume Next
-
-    Dim a2d As New ArrayEx2
-    a2d.Init (array2d())
-    test_.AssertFalse IsNull(a2d.Value)
-    test_.AssertEqual "[1,2,3]", a2d.Extract(1, "1:3").ToString()
-    test_.AssertEqual "[1,2,3]", a2d.Extract(1, "1 To 3").ToString()
-    test_.AssertEqual "[1,2,3]", a2d.Extract(1, "1,2,3").ToString()
-    test_.AssertEqual "[1,2,3;2,4,6]", a2d.Extract("1:2", "1:3").ToString()
-
-    a2d.Extract(1, ":3").ToString
-    test_.AssertHasError
-
-    Dim a1d As New ArrayEx1
-    a1d.Init (array1d())
-    test_.AssertFalse IsNull(a1d.Value)
-    test_.AssertEqual 1, a1d.Value(1)
-    test_.AssertEqual 2, a1d.Value("1:3")(2)
-    test_.AssertEqual 3, a1d.Value("1:3")(3)
-    test_.AssertEqual 3, UBound(a1d.Value("1:3"))
-    test_.AssertEqual "[1,2,3]", a1d.GetElements("1,2,3").ToString
-    test_.AssertEqual "[1,2,3]", a1d.GetElements("1 to 3").ToString
-    test_.AssertEqual "[1,2,3]", a1d.GetElements("1:3").ToString
-    test_.AssertEqual "[1,2,3,4,5]", a1d.GetElements(":").ToString
-
-    Dim a0d As New ArrayEx0
-    a0d.Init (1)
-    test_.AssertFalse IsNull(a0d.Value)
-    test_.AssertEqual 1, a0d.Value
-
-End Sub
-
-Sub SetValue_GetMethodIsCorrect_NoException()
-    On Error Resume Next
-
-    Dim a2d As New ArrayEx2
-    Dim a1d As New ArrayEx1
-    Dim b1d As New ArrayEx1
-    Dim c0d As New ArrayEx0
-    
-    a2d.Init (array2d())
-    a1d.Init (array1drow())
-    b1d.Init (array1d())
-    c0d.Init ("test")
- 
-    Call a2d.SetElement(1, 1, 10)
-    test_.AssertEqual 10, a2d(1, 1)
-    Call a2d.SetRow(1, a1d)
-    test_.AssertTrue a2d.GetRow(1).Equal(a1d)
-    Call a2d.SetColumn(1, b1d)
-    test_.AssertTrue a2d.GetColumn(1).Equal(b1d)
-
-    Call a1d.SetElement(1, 10)
-    test_.AssertEqual 10, a1d(1)
-
-    c0d.Value = "sample"
-    test_.AssertEqual "sample", c0d.Value
-End Sub
-
-Sub AddElement_NoException()
-    On Error Resume Next
-    Dim a2d As New ArrayEx2
-    Dim a1d As New ArrayEx1
-    Dim a0d As New ArrayEx0
-    
-    a2d.Init (array2d())
-    a1d.Init (array1d())
-    a0d.Init (10)
-    
-    test_.AssertEqual 6, a2d.AddRow(a2d.GetRow(1)).ub(1)
-    test_.AssertEqual 11, a2d.AddColumn(a2d.GetColumn(1)).ub(2)
-    test_.AssertEqual 6, a1d.AddElement(a0d).ub
-End Sub
-
-Sub Converts_NoException()
-    Dim collect1 As Collection, collect2 As Collection
-    Dim a0d As New ArrayEx0
-    Dim a1d As New ArrayEx1
-    Dim a2d As New ArrayEx2
-    
-    Set collect1 = a1d.Init(array1d()).ToCollection
-    Set collect2 = a2d.Init(array2d()).ToCollection
-    
-    test_.AssertEqual "123", a0d.Init(123).ToString
-    test_.AssertEqual 5, collect2.Count
-    test_.AssertEqual "[1,2,3]", collect2.Item(1).Extract("1:3").ToString
-    test_.AssertEqual 5, collect1.Count
-    test_.AssertEqual 1, collect1.Item(1).Value
-End Sub
-
-Sub Test_Array0_StringsFunctions_NoException()
-    Dim a0d As New ArrayEx0
-    test_.AssertEqual "fuga", a0d.Init("hoge").Replace("h", "f").Replace("oge", "uga").ToString
-    test_.AssertEqual "323", a0d.Init(123).Replace("1", "3").ToString
-    test_.AssertEqual "45", a0d.Init("123456789").Left(5).Right(4).Mid(2).Mid(2, 2).Value
-End Sub
-
-Sub Test_012_DebugPrint_NoTest()
-    Dim a2d As New ArrayEx2
-    Dim a1d As New ArrayEx1
-    Dim a0d As New ArrayEx0
-    
-    a2d.Init (array2d())
-    a2d.DebugPrint("{x}, {y}", "1,4", "no1 : {x}, no4:{y}").GetRow(1).DebugPrint ("Test:{x}")
-    a2d.Extract("1:3", "2:5").DebugPrintAll.GetColumn(1).DebugPrintAll.GetElement(3).DebugPrint
-End Sub
-
-Sub Array1Linqs_NoException()
-    On Error Resume Next
-    
-    Dim a1d As New ArrayEx1
-    a1d.Init (array1d())
-    
-With test_
-    .AssertEqual 5, a1d.Count
-    .AssertTrue a1d.Contains(4)
-    .AssertEqual 1, a1d.Min()
-    .AssertEqual 5, a1d.Max()
-    
-    .AssertEqual 1, a1d.First().Value
-    .AssertEqual 5, a1d.Last().Value
-
-    .AssertEqual "[3,4,5]", a1d.Skip(2).ToString()
-    .AssertEqual "[1,2,3]", a1d.TAKE(3).ToString()
-    .AssertEqual "[1,2,3,4,5]", a1d.OrderBy().ToString()
-    .AssertEqual "[5,4,3,2,1]", a1d.OrderByDescending().ToString()
-    .AssertEqual "[5,4,3,2,1]", a1d.Reverse().ToString()
-
-    .AssertEqual "[4,5]", a1d.WhereEvaluated("x", "x > 3").ToString()
-    a1d.WhereEvaluated "x", "y>3"
-    .AssertEqual 1003, Err.Number
-    a1d.WhereEvaluated "x", "x + 3"
-    .AssertHasNoError
-    
-    .AssertEqual "[4,7,12,19,28]", a1d.SelectEvaluated("{x}", "{x}^2+ 3").ToString()
-
-    .AssertTrue a1d.AllEvaluate("x", "x > 0 ")
-    .AssertFalse a1d.AllEvaluate("x", "x > 1 ")
-    a1d.AllEvaluate "x", "x & Hello "
-    .AssertEqual 1003, Err.Number
-    a1d.AllEvaluate "x", "x + 0"
-        
-    .AssertTrue a1d.AnyEvaluate("x", "x > 4 ")
-    .AssertFalse a1d.AnyEvaluate("x", "x > 5 ")
-
-    Dim a1dDistinct As New ArrayEx1
-    a1dDistinct.Init (array1dHasDuplication)
-    .AssertEqual "[1,2,4,5]", a1dDistinct.Distinct.ToString()
-End With
-
-    
-End Sub
-
-Sub Array2Linqs_NoException()
-    On Error Resume Next
-    
-    Dim a2d As New ArrayEx2
-    a2d.Init (array2d())
-        
-    With test_
-        a2d.WhereEvaluated "x,y,z", "1,2", "x+y=3"
-        .AssertEqual 2002, Err.Number
-        a2d.WhereEvaluated "x,y", "1,2,3", "x+y=3"
-        .AssertEqual 2002, Err.Number
-        
-        .AssertEqual 1, a2d.WhereEvaluated("x,y", "0,1", "x+y=3").Count
-        .AssertEqual "[4,8,12,16,20]", a2d.SelectEvaluated("x,y", "0,2", "x+y").ToString
-        .AssertEqual "[1,2,3,4,5]", a2d.SelectEvaluated("x", "0", "x").ToString
-        .AssertTrue a2d.AllEvaluate("x", "2", "x>=3")
-        .AssertTrue a2d.AnyEvaluate("x", "2", "x>3")
-    
-        .AssertEqual "[1,2,3,4,5,6,7,8,9,10]", a2d.First.ToString()
-        .AssertEqual "[5,10,15,20,25,30,35,40,45,50]", a2d.Last.ToString()
-    
-        .AssertEqual 4, a2d.Skip(1).Count
-        .AssertEqual 3, a2d.TAKE(3).Count
-        .AssertEqual "[1,2,3,4,5]", a2d.OrderBy(1).GetColumn(0).ToString()
-        .AssertEqual "[5,4,3,2,1]", a2d.OrderByDescending(1).GetColumn(0).ToString()
-        .AssertEqual a2d.ToString(), a2d.Reverse.Reverse.ToString()
-    
-        Dim a2dDuplication As New ArrayEx2
-        .AssertEqual "[1,2,4,5]", a2dDuplication.Init(array2dDuplication).Distinct(1).GetColumn(0).ToString
-    End With
-End Sub
-
-' ----------------------------------------------------------------------------------------------------------------------
-'Private Function RunTest(testName As String)
-'    Dim res As String
-'    Application.Run (testName)
-'    Debug.Print (IIf(Err.Number = 0, "OK", "NG") & ": " & testName & IIf(Err.Number = 0, "", ", " & Err.Number & ", " & Err.Source & ", " & Err.Description))
-'    Err.Clear
-'End Function
-'
-'Private Function AssertTrue(condition) As Boolean
-'    AssertTrue = False
-'    On Error GoTo errCondition
-'    If condition = True Then
-'        AssertTrue = True
-'    Else
-'        Call Err.Raise(9001, "", "Should be True.")
-'    End If
-'    Exit Function
-'errCondition:
-'End Function
-'
-'Private Function AssertFalse(condition) As Boolean
-'    AssertFalse = False
-'    On Error GoTo errCondition
-'    If condition = False Then
-'        AssertFalse = True
-'    Else
-'        Call Err.Raise(9002, "", "Should be False.")
-'    End If
-'    Exit Function
-'errCondition:
-'End Function
-'
-'Private Function AssertEqual(expected, actual) As Boolean
-'    AssertEqual = False
-'    On Error GoTo errCondition
-'    If expected = actual Then
-'        AssertEqual = True
-'    Else
-'        Call Err.Raise(9003, "", "Should be equal. expected is " & expected & ", actual is " & actual)
-'    End If
-'    Exit Function
-'errCondition:
-'End Function
-'
-'Private Function AssertNotEqual(expected, actual) As Boolean
-'    AssertNotEqual = False
-'    On Error GoTo errCondition
-'    If expected <> actual Then
-'        AssertNotEqual = True
-'    Else
-'        Call Err.Raise(9004, "", "Should not be equal. expected is " & expected & ", actual is " & actual)
-'    End If
-'    Exit Function
-'errCondition:
-'End Function
-'
-'Private Function AssertHasError() As Boolean
-'    AssertHasError = IIf(Err.Number <> 0, True, False)
-'End Function
-'
-'Private Function AssertHasNoError() As Boolean
-'    AssertHasNoError = IIf(Err.Number = 0, True, False)
-'End Function
-

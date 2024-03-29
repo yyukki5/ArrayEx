@@ -28,6 +28,10 @@ Public Property Get Value()
     Value = array_
 End Property
 
+Public Property Let Value(array2d)
+    Init array2d
+End Property
+
 Public Property Get ub(Optional direction As Long = 1) As Long
     ub = UBound(array_, direction)
 End Property
@@ -57,19 +61,20 @@ Public Function InitForce(arr As Variant) As ArrayEx2
     Set InitForce = Me
 End Function
 
-'todo delete ???
-Public Function Create(Optional array2d As Variant) As ArrayEx2
-    If IsMissing(array2d) = True And IsEmpty(array_) Then Call Err.Raise(2105, "ArrayEx2 Create", "ArrayEx: Not initialized")
-    Dim rearr As New ArrayEx2
-    If IsMissing(array2d) Then
-        Set Create = rearr.Init(array_)
-    Else
-        Set Create = rearr.Init(array2d)
-    End If
-End Function
+''todo delete ???
+'Public Function Create(Optional array2d As Variant) As ArrayEx2
+'    If IsMissing(array2d) = True And IsEmpty(array_) Then Call Err.Raise(2105, "ArrayEx2 Create", "ArrayEx: Not initialized")
+'    Dim rearr As New ArrayEx2
+'    If IsMissing(array2d) Then
+'        Set Create = rearr.Init(array_)
+'    Else
+'        Set Create = rearr.Init(array2d)
+'    End If
+'End Function
 
-Public Function Equals(array2d) As Boolean
+Public Function Equals(arrayEx2d As ArrayEx2) As Boolean
     Equals = False
+    Dim array2d: array2d = arrayEx2d.Value
     If lb(1) <> LBound(array2d, 1) Then Exit Function
     If lb(2) <> LBound(array2d, 2) Then Exit Function
     If ub(1) <> UBound(array2d, 1) Then Exit Function
@@ -166,6 +171,7 @@ Public Function GetColumn(col As Long) As ArrayEx1
     Dim re, rearr As New ArrayEx1
     
     re = ArrayExCore.ConvertToDimensionN(ExtractCore(":", col).Transpose.Value, 1)
+'    re = ExtractCore(":", col).Value
     
     Set GetColumn = rearr.Init(re)
 End Function
@@ -184,35 +190,51 @@ End Function
 
 Function AddColumn(colArrayEx1 As ArrayEx1) As ArrayEx2
     Dim rearr As New ArrayEx2
-    Set AddColumn = rearr.InitForce(ArrayExCore.HSTACK(array_, colArrayEx1.Value))
+    Set AddColumn = rearr.InitForce(ArrayExCore.HSTACK(array_, WorksheetFunction.Transpose(colArrayEx1.Value)))
 End Function
 
 ' Convert
 Public Function ToString() As String
     Dim s As String, i As Long, j As Long
-    s = "["
+    s = "{"
     For i = lb(1) To ub(1)
         For j = lb(2) To ub(2)
             s = s & CStr(array_(i, j)) & ","
         Next j
         s = Left(s, Len(s) - 1) & ";"
     Next i
-    s = Left(s, Len(s) - 1) & "]"
+    s = Left(s, Len(s) - 1) & "}"
     ToString = s
 End Function
 
 Public Function ToRange(rng As Range)
     rng.Resize(Count(1), Count(2)).Value = array_
+    Set ToRange = rng.Resize(Count(1), Count(2))
 End Function
 
-Public Function ToCollection() As Collection
+Public Function ToCollection(Optional dimension As Long = 0) As Collection
     Dim coll As New Collection
-    Dim arr As New ArrayEx1
-    Dim i As Long
-    For i = lb To ub
-        Set arr = GetRow(i)
-        coll.Add arr
-    Next i
+    Dim arr0 As ArrayEx0, arr1 As ArrayEx1
+    Dim i As Long, ar
+    Select Case dimension
+        Case 1
+            For i = lb(1) To ub(1)
+                Set arr1 = New ArrayEx1
+                Set arr1 = GetRow(i)
+                coll.Add arr1
+            Next i
+        Case 2
+            For i = lb(2) To ub(2)
+                Set arr1 = New ArrayEx1
+                Set arr1 = GetColumn(i)
+                coll.Add arr1
+            Next i
+        Case Else
+            For Each ar In array_
+                Set arr0 = New ArrayEx0
+                coll.Add arr0.Init(ar)
+            Next
+    End Select
     Set ToCollection = coll
 End Function
 
@@ -226,26 +248,51 @@ Public Function Last() As ArrayEx1
 End Function
 
 Public Function Skip(skipIndex As Long) As ArrayEx2
-    Set Skip = ExtractCore(skipIndex & ":" & ub, ":")
+    Set Skip = ExtractCore(lb + skipIndex & ":" & ub, ":")
 End Function
 
 Public Function TAKE(skipIndex As Long) As ArrayEx2
-    Set TAKE = ExtractCore(lb & ":" & skipIndex - 1, ":")
+    Set TAKE = ExtractCore(lb & ":" & skipIndex + lb - 1, ":")
 End Function
 
 Public Function Distinct(column As Long) As ArrayEx2
-    Dim arr As New ArrayEx1
-    Set arr = GetColumn(column)
     Dim i As Long, s As String, sIndexes As String
-    For i = arr.lb To arr.ub
-        If InStr(s, arr.GetElement(i)) = 0 Then
-            s = s & arr.GetElement(i) & ","
+    
+    Dim arrayCollection As Collection
+    Set arrayCollection = ToCollection(1)
+    Dim coll As New Collection
+    Dim arr As ArrayEx1
+    For i = lb To ub
+        Set arr = arrayCollection.Item(i)
+        If IsDuplicated(coll, arr) Then
+        Else
+            coll.Add arr
             sIndexes = sIndexes & i & ","
         End If
     Next i
+    
+    
+'    For i = lb To ub
+'        If IsDuplicated(coll, array_(i, column)) Then
+'        Else
+'            coll.Add array_(i, column)
+'            sIndexes = sIndexes & i & ","
+'        End If
+'    Next i
     If sIndexes = "" Then Exit Function
     sIndexes = Left(sIndexes, Len(sIndexes) - 1)
     Set Distinct = ExtractCore(sIndexes, ":")
+End Function
+
+Private Function IsDuplicated(coll As Collection, val) As Boolean
+    Dim col
+    On Error GoTo errEqual
+    IsDuplicated = True
+    For Each col In coll
+        If col.Equals(val) Then Exit Function:
+    Next
+    IsDuplicated = False
+errEqual:
 End Function
 
 Public Function OrderBy(column As Long) As ArrayEx2
@@ -272,6 +319,7 @@ Public Function AllEvaluate(arguments, columnNumbers, formula As String) As Bool
     AllEvaluate = False
     Dim evaluation
     For Each evaluation In GetEvaluations(arguments, columnNumbers, formula)
+        If VarType(evaluation) <> vbBoolean Then Err.Raise 2101, "ArrayEx2.AllEvaluate()", "Should evaluated value boolean, but not boolean: " & evaluation
         If evaluation = False Then Exit Function
     Next
     AllEvaluate = True
@@ -362,7 +410,7 @@ Private Function GetEvaluations(arguments, columnNumbers, formula As String) As 
         For j = LBound(args) To UBound(args)
             s = Replace(s, args(j), array_(i, cols(j)))
         Next j
-        If ArrayExCore.TryEvaluate(s, re) Then rearr(i) = re
+        If ArrayExCore.TryEvaluate(s, re) Then rearr(i) = re Else Err.Raise 2003, "ArrayEx2.GetEvaluations()", "String in evaluate() is error :" & s & "."
     Next i
     GetEvaluations = rearr
 End Function

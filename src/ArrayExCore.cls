@@ -31,7 +31,8 @@ Private Const INDEX_TO As String = "to"
 
 
 Public Function Validate(arr)
-    If IsError(arr) Then Err.Raise 9100, "ArrayExCore.Validate", "argument is invalid. (error)"
+    If IsEmpty(arr) Then Err.Raise 9100, "ArrayExCore.Validate", "argument is invalid. (Empty)"
+    If IsError(arr) Then Err.Raise 9100, "ArrayExCore.Validate", "argument is invalid. (Error)"
     If IsNull(arr) Then Err.Raise 9100, "ArrayExCore.Validate", "argument is invalid.(Null)"
     If VarType(arr) Mod vbArray = vbObject Then Err.Raise 9100, "ArrayExCore.Validate", "argument is invalid.(Object)"
 End Function
@@ -97,13 +98,12 @@ outLoop:
 End Function
 
 Public Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Boolean
-    TryEvaluate = False
+    TryEvaluate = False: re = Null
+On Error GoTo errEvaluate
     re = Evaluate(evaluateString)
     If IsError(re) = True Then GoTo errEvaluate
     TryEvaluate = True
-    Exit Function
 errEvaluate:
-    Debug.Print "ArrayExCore, TryEvaluate(). String in evaluate() is error :" & evaluateString & "."
 End Function
 
 Public Function ExtractCore(arr, Indexes1 As Variant, Optional Indexes2 As Variant) As Variant
