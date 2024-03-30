@@ -12,7 +12,8 @@ Sub Sample()
     Call arr.Init(Range("A1:E3").Value) _
         .DebugPrintAll _
         .Extract("1:3", ":") _
-        .DebugPrintAll _
+        .WhereEvaluated("x", 1, "x>1") _
+        .DebugPrintAll() _
         .GetRow(1) _
         .DebugPrintAll _
         .Skip(1) _
@@ -21,3 +22,4 @@ Sub Sample()
         .ToRange(Range("A5"))
     
 End Sub
+
