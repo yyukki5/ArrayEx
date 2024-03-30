@@ -7,9 +7,14 @@
 # not using
 .vs/
 bin/old/
-*.xlsm
+bin/*.xlsm
+vbac.wsf
 *.doccls
 ~$*
+
+# remove files for release
+UnitTest.cls
+UnitTests.bas
 
 
 # User-specific files

@@ -1,12 +1,12 @@
 # ArrayEx
 GitHubの練習と、最近勉強したVBAの練習と、作ったものがアウトプットされないと気が済まない気がしてきたというレポジトリ  
 
-- ArrayEx (本体)    : src
+- ArrayEx (本体)    : src\ArrayEx.xlsm
     - ArrayExCore.cls
     - ArrayEx0.cls 
     - ArrayEx1.cls
     - ArrayEx2.cls
-- Test, Sample
+- Sample
 
 C#のメソッドチェーンのように書けると嬉しいなぁというアイディアから。思い立ったので自作。
 また、CHOOSEROW, VSTACK, HSTACKなどの関数が使いたいなぁと思ったので自作。
