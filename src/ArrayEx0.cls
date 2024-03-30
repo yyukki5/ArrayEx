@@ -41,17 +41,6 @@ Public Function InitForce(arr As Variant) As ArrayEx0
     Set InitForce = Me
 End Function
 
-'' todo delete ?
-'Public Function Create(Optional array0d As Variant) As ArrayEx0
-'    If IsMissing(array0d) = True And IsEmpty(array_) Then Err.Raise 105, "ArrayEx0 Create", "ArrayEx: Not initialized"
-'    Dim rearr As New ArrayEx0
-'    If IsMissing(array0d) Then
-'        Set Create = rearr.Init(array_)
-'    Else
-'        Set Create = rearr.Init(array0d)
-'    End If
-'End Function
-
 Public Function Equals(arrayEx0d As ArrayEx0) As Boolean
     Equals = (array_ = arrayEx0d.Value)
 End Function

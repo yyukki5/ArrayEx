@@ -3,15 +3,20 @@ Option Explicit
 
 Sub Sample()
 
-    Dim arr As New ArrayEx2
+    Dim ar, rearr
+    ar = Range("A1:E3").Value
+    rearr = ArrayExCore.HSTACK(ar, ar)
+
+    Dim arr As ArrayEx2
+    Set arr = New ArrayEx2
     Call arr.Init(Range("A1:E3").Value) _
         .DebugPrintAll _
-        .Extract("0:1", ":") _
+        .Extract("1:3", ":") _
         .DebugPrintAll _
         .GetRow(1) _
         .DebugPrintAll _
         .Skip(1) _
-        .SetElement(0, 11) _
+        .SetElement(1, 11) _
         .DebugPrintAll _
         .ToRange(Range("A5"))
     

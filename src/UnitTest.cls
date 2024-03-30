@@ -47,7 +47,7 @@ End Function
 Public Function RunTest(testName As String)
 On Error Resume Next
     Application.Run (testName)
-    CopyErr ' When application run has error, catch
+    CopyErr "RunTest" ' When application run has error, catch
     Debug.Print (IIf(errNumber_ = 0, "OK", "NG") & ": " & testName & IIf(errNumber_ = 0, "", errResult_))
     ClearErr
 End Function
@@ -58,7 +58,7 @@ Public Function AssertTrue(condition)
     If condition = True Then Else Call Err.Raise(9001, "", "NG: Should be True.")
     Exit Function
 errCondition:
-    CopyErr
+    CopyErr "AssertTrue"
     If isSingleTest Then DebugPrintErr
 End Function
 
@@ -67,18 +67,18 @@ Public Function AssertFalse(condition)
     If condition = False Then Else Call Err.Raise(9002, "", "NG: Should be False.")
     Exit Function
 errCondition:
-    CopyErr
+    CopyErr "AssertFalse"
      If isSingleTest Then DebugPrintErr
 End Function
 
 Public Function AssertEqual(expected, actual)
     On Error GoTo errCondition
-    If VarType(expected) = vbObject And VarType(actual) = vbObject Then If expected.Equals(actual) Then GoTo pass Else Call Err.Raise(9003, "", "NG: Should be equal.")
+    If VarType(expected) = vbObject And VarType(actual) = vbObject Then If expected.Equals((actual)) Then GoTo pass Else Call Err.Raise(9003, "", "NG: Should be equal.")
     If expected = actual Then Else Call Err.Raise(9003, "", "NG: Should be equal. expected is " & expected & ", actual is " & actual)
 pass:
     Exit Function
 errCondition:
-    CopyErr
+    CopyErr "AssertEqual"
     If isSingleTest Then DebugPrintErr
 End Function
 
@@ -87,12 +87,12 @@ Public Function AssertNotEqual(expected, actual)
     If expected <> actual Then Else Call Err.Raise(9004, "", "NG: Should not be equal. expected is " & expected & ", actual is " & actual)
     Exit Function
 errCondition:
-    CopyErr
+    CopyErr "AssertNotEqual"
     If isSingleTest Then DebugPrintErr
 End Function
 
 Public Function AssertHasError()
-    If Err.Number <> 0 Then
+     If Err.Number <> 0 Then
     Else
         On Error GoTo errCondition
         Call Err.Raise(9005, "", "NG: Should have error, but has no error.")
@@ -100,7 +100,7 @@ Public Function AssertHasError()
     Err.Clear
     Exit Function
 errCondition:
-    CopyErr
+    CopyErr "AssertHasError"
     If isSingleTest Then DebugPrintErr: Err.Clear
 End Function
 
@@ -115,19 +115,20 @@ Public Function AssertHasNoError()
     End If
     Exit Function
 errCondition:
-    CopyErr
+    CopyErr "AssertHasNoError"
     If isSingleTest Then DebugPrintErr:     Err.Clear
 End Function
 
+' ------------------------------------------------------------------------
 Private Function DebugPrintErr()
-    Debug.Print errDescription_
+    Debug.Print errSource_ & " : " & errDescription_
 End Function
 
-Private Function CopyErr()
+Private Function CopyErr(Optional testName As String)
     errNumber_ = IIf(Err.Number = 0, errNumber_, Err.Number)
     errDescription_ = IIf(Err.Number = 0, errDescription_, Err.Description)
-    errSource_ = IIf(Err.Number = 0, errSource_, Err.Source)
-    errResult_ = IIf(Err.Number = 0, errResult_, errResult_ & vbCrLf & " - " & errDescription_)
+    errSource_ = IIf(Err.Number = 0, errSource_, "(" & testName & ") " & Err.Source)
+    errResult_ = IIf(Err.Number = 0, errResult_, errResult_ & vbCrLf & "  - " & errSource_ & " : " & errDescription_)
 End Function
 
 Private Function ClearErr()

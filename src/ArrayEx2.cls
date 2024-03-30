@@ -32,12 +32,12 @@ Public Property Let Value(array2d)
     Init array2d
 End Property
 
-Public Property Get ub(Optional direction As Long = 1) As Long
-    ub = UBound(array_, direction)
+Public Property Get Ub(Optional direction As Long = 1) As Long
+    Ub = UBound(array_, direction)
 End Property
 
-Public Property Get lb(Optional direction As Long = 1) As Long
-    lb = LBound(array_, direction)
+Public Property Get Lb(Optional direction As Long = 1) As Long
+    Lb = LBound(array_, direction)
 End Property
 
 Public Property Get Count(Optional direction As Long = 1) As Long
@@ -61,27 +61,17 @@ Public Function InitForce(arr As Variant) As ArrayEx2
     Set InitForce = Me
 End Function
 
-''todo delete ???
-'Public Function Create(Optional array2d As Variant) As ArrayEx2
-'    If IsMissing(array2d) = True And IsEmpty(array_) Then Call Err.Raise(2105, "ArrayEx2 Create", "ArrayEx: Not initialized")
-'    Dim rearr As New ArrayEx2
-'    If IsMissing(array2d) Then
-'        Set Create = rearr.Init(array_)
-'    Else
-'        Set Create = rearr.Init(array2d)
-'    End If
-'End Function
-
 Public Function Equals(arrayEx2d As ArrayEx2) As Boolean
-    Equals = False
     Dim array2d: array2d = arrayEx2d.Value
-    If lb(1) <> LBound(array2d, 1) Then Exit Function
-    If lb(2) <> LBound(array2d, 2) Then Exit Function
-    If ub(1) <> UBound(array2d, 1) Then Exit Function
-    If ub(2) <> UBound(array2d, 2) Then Exit Function
+    
+    Equals = False
+    If Lb(1) <> LBound(array2d, 1) Then Exit Function
+    If Lb(2) <> LBound(array2d, 2) Then Exit Function
+    If Ub(1) <> UBound(array2d, 1) Then Exit Function
+    If Ub(2) <> UBound(array2d, 2) Then Exit Function
     Dim i As Long, j As Long
-    For i = lb(1) To ub(1)
-        For j = lb(2) To ub(2)
+    For i = Lb(1) To Ub(1)
+        For j = Lb(2) To Ub(2)
             If array_(i, j) <> array2d(i, j) Then Exit Function
         Next j
     Next i
@@ -97,87 +87,76 @@ Public Function ShiftIndex(ri As Long, ci As Long) As ArrayEx2
 End Function
 
 ' Set
-Public Function SetElements(argRows As Variant, argCols As Variant, argVal As Variant) As ArrayEx2
-    Dim rows, cols
-    rows = ArrayExCore.IndexToArray(argRows, lb(1), ub(1))
-    cols = ArrayExCore.IndexToArray(argCols, lb(2), ub(2))
-    If UBound(rows) <> UBound(argVal, 1) Then Call Err.Raise(2102, "SetElements", "ArrayEx: Need same size")
-    If UBound(cols) <> UBound(argVal, 2) Then Call Err.Raise(2102, "SetElements", "ArrayEx: Need same size")
+Public Function SetElement(rowIndexes As Variant, columnIndexes As Variant, val As Variant) As ArrayEx2
+    Dim rIndexes, cIndexes
+    Dim i As Long, j As Long
 
-    Dim i As Long, j As Long, ii As Long, jj As Long
+    rIndexes = ArrayExCore.IndexToArray(rowIndexes, Lb(1), Ub(1))
+    cIndexes = ArrayExCore.IndexToArray(columnIndexes, Lb(2), Ub(2))
     Dim re
-    ii = 1
-    For i = LBound(rows) To UBound(rows)
-        jj = 1
-        For j = LBound(cols) To UBound(cols)
-            array_(rows(i), cols(j)) = argVal(ii, jj)
-            jj = jj + 1
+    For i = LBound(rIndexes) To UBound(rIndexes)
+        For j = LBound(cIndexes) To UBound(cIndexes)
+            array_(rIndexes(i), cIndexes(j)) = val
         Next j
-        ii = ii + 1
     Next i
-    Set SetElements = Me
-End Function
-
-Public Function SetElement(argRows As Long, argCols As Long, argVal As Variant) As ArrayEx2
-    array_(argRows, argCols) = argVal
     Set SetElement = Me
 End Function
 
-Public Function SetRow(argRow As Long, argArrayEx1 As ArrayEx1)
+Public Function SetRow(rowIndexes As Long, argArrayEx1 As ArrayEx1)
     Dim i
-    If lb(2) <> argArrayEx1.lb And ub(2) <> argArrayEx1.ub Then _
+    If Lb(2) <> argArrayEx1.Lb And Ub(2) <> argArrayEx1.Ub Then _
             Call Err.Raise(2102, "SetRow", "ArrayEx: Need same length")
     
     Dim re:  re = argArrayEx1.Value
-    For i = lb(2) To ub(2)
-        array_(argRow, i) = re(i)
+    For i = Lb(2) To Ub(2)
+        array_(rowIndexes, i) = re(i)
     Next i
     Set SetRow = Me
 End Function
 
-Public Function SetColumn(argCol As Long, argArrayEx1 As ArrayEx1)
+Public Function SetColumn(columnIndexes As Long, argArrayEx1 As ArrayEx1)
     Dim i
-    If lb(1) <> argArrayEx1.lb And ub(1) <> argArrayEx1.ub Then _
+    If Lb(1) <> argArrayEx1.Lb And Ub(1) <> argArrayEx1.Ub Then _
             Call Err.Raise(2102, "SetColumn", "ArrayEx: Need same length")
     
     Dim re:  re = argArrayEx1.Value
-    For i = lb(1) To ub(1)
-        array_(i, argCol) = re(i)
+    For i = Lb(1) To Ub(1)
+        array_(i, columnIndexes) = re(i)
     Next i
     Set SetColumn = Me
 End Function
 
-Public Function Extract(rows As Variant, cols As Variant) As ArrayEx2
-    Set Extract = ExtractCore(rows, cols)
+Public Function Extract(rowIndexes As Variant, columnIndexes As Variant) As ArrayEx2
+    Set Extract = ExtractCore(rowIndexes, columnIndexes)
 End Function
 
-Public Function GetRows(rows As Variant) As ArrayEx2
-    Set GetRows = ExtractCore(rows, ":")
+Public Function GetRows(rowIndexes As Variant) As ArrayEx2
+    Set GetRows = ExtractCore(rowIndexes, ":")
 End Function
 
-Public Function GetColumns(cols As Variant) As ArrayEx2
-    Set GetColumns = ExtractCore(":", cols)
+Public Function GetColumns(columnIndexes As Variant) As ArrayEx2
+    Set GetColumns = ExtractCore(":", columnIndexes)
 End Function
 
-Function GetRow(row As Long) As ArrayEx1
+Function GetRow(rowIndex As Long) As ArrayEx1
     Dim re, rearr As New ArrayEx1
     
-    re = ArrayExCore.ConvertToDimensionN(ExtractCore(row, ":").Value, 1)
+    re = ArrayExCore.ConvertToDimensionN(ExtractCore(rowIndex, ":").Value, 1)
     
     Set GetRow = rearr.Init(re)
 End Function
 
-Public Function GetColumn(col As Long) As ArrayEx1
+Public Function GetColumn(columnIndex As Long) As ArrayEx1
     Dim re, rearr As New ArrayEx1
     
-    re = ArrayExCore.ConvertToDimensionN(ExtractCore(":", col).Transpose.Value, 1)
+    re = ArrayExCore.ConvertToDimensionN(ExtractCore(":", columnIndex).Transpose.Value, 1)
 '    re = ExtractCore(":", col).Value
     
     Set GetColumn = rearr.Init(re)
 End Function
 
-Public Function GetElement(row As Long, col As Long) As ArrayEx0
-    Dim rre:   rre = ExtractCore(row, col).Value
+Public Function GetElement(rowIndex As Long, columnIndex As Long) As ArrayEx0
+    Dim rre:   rre = ExtractCore(rowIndex, columnIndex).Value
     Dim rearr As New ArrayEx0
     Set GetElement = rearr.Init(rre(LBound(rre, 1), LBound(rre, 2)))
 End Function
@@ -197,8 +176,8 @@ End Function
 Public Function ToString() As String
     Dim s As String, i As Long, j As Long
     s = "{"
-    For i = lb(1) To ub(1)
-        For j = lb(2) To ub(2)
+    For i = Lb(1) To Ub(1)
+        For j = Lb(2) To Ub(2)
             s = s & CStr(array_(i, j)) & ","
         Next j
         s = Left(s, Len(s) - 1) & ";"
@@ -218,13 +197,13 @@ Public Function ToCollection(Optional dimension As Long = 0) As Collection
     Dim i As Long, ar
     Select Case dimension
         Case 1
-            For i = lb(1) To ub(1)
+            For i = Lb(1) To Ub(1)
                 Set arr1 = New ArrayEx1
                 Set arr1 = GetRow(i)
                 coll.Add arr1
             Next i
         Case 2
-            For i = lb(2) To ub(2)
+            For i = Lb(2) To Ub(2)
                 Set arr1 = New ArrayEx1
                 Set arr1 = GetColumn(i)
                 coll.Add arr1
@@ -240,45 +219,35 @@ End Function
 
 ' Linqs
 Public Function First() As ArrayEx1
-    Set First = GetRow(lb)
+    Set First = GetRow(Lb)
 End Function
 
 Public Function Last() As ArrayEx1
-    Set Last = GetRow(ub)
+    Set Last = GetRow(Ub)
 End Function
 
 Public Function Skip(skipIndex As Long) As ArrayEx2
-    Set Skip = ExtractCore(lb + skipIndex & ":" & ub, ":")
+    Set Skip = ExtractCore(Lb + skipIndex & ":" & Ub, ":")
 End Function
 
 Public Function TAKE(skipIndex As Long) As ArrayEx2
-    Set TAKE = ExtractCore(lb & ":" & skipIndex + lb - 1, ":")
+    Set TAKE = ExtractCore(Lb & ":" & skipIndex + Lb - 1, ":")
 End Function
 
-Public Function Distinct(column As Long) As ArrayEx2
+Public Function Distinct(columnIndex As Long) As ArrayEx2
     Dim i As Long, s As String, sIndexes As String
     
     Dim arrayCollection As Collection
     Set arrayCollection = ToCollection(1)
     Dim coll As New Collection
-    Dim arr As ArrayEx1
-    For i = lb To ub
-        Set arr = arrayCollection.Item(i)
-        If IsDuplicated(coll, arr) Then
+    For i = Lb To Ub
+        If IsDuplicated(coll, array_(i, columnIndex)) Then
         Else
-            coll.Add arr
+            coll.Add array_(i, columnIndex)
             sIndexes = sIndexes & i & ","
         End If
     Next i
     
-    
-'    For i = lb To ub
-'        If IsDuplicated(coll, array_(i, column)) Then
-'        Else
-'            coll.Add array_(i, column)
-'            sIndexes = sIndexes & i & ","
-'        End If
-'    Next i
     If sIndexes = "" Then Exit Function
     sIndexes = Left(sIndexes, Len(sIndexes) - 1)
     Set Distinct = ExtractCore(sIndexes, ":")
@@ -289,73 +258,73 @@ Private Function IsDuplicated(coll As Collection, val) As Boolean
     On Error GoTo errEqual
     IsDuplicated = True
     For Each col In coll
-        If col.Equals(val) Then Exit Function:
+        If col = val Then Exit Function
     Next
     IsDuplicated = False
 errEqual:
 End Function
 
-Public Function OrderBy(column As Long) As ArrayEx2
+Public Function OrderBy(columnIndex As Long) As ArrayEx2
     Dim re As New ArrayEx2
-    Set OrderBy = re.Init(WorksheetFunction.Sort(array_, column))
+    Set OrderBy = re.Init(WorksheetFunction.Sort(array_, columnIndex))
 End Function
 
-Public Function OrderByDescending(column As Long) As ArrayEx2
+Public Function OrderByDescending(columnIndex As Long) As ArrayEx2
     Dim re As New ArrayEx2
-    Set OrderByDescending = re.Init(WorksheetFunction.Sort(array_, column, -1, False))
+    Set OrderByDescending = re.Init(WorksheetFunction.Sort(array_, columnIndex, -1, False))
 End Function
 
 Public Function Reverse() As ArrayEx2
-    Dim rearr: ReDim rearr(lb To ub)
+    Dim rearr: ReDim rearr(Lb To Ub)
     Dim i As Long
-    For i = lb To ub
-        rearr(i) = array_(ub - i + 1)
+    For i = Lb To Ub
+        rearr(i) = Ub + 1 - i
     Next i
     Dim re As New ArrayEx2
     Set Reverse = ExtractCore(rearr, ":")
 End Function
 
-Public Function AllEvaluate(arguments, columnNumbers, formula As String) As Boolean
+Public Function AllEvaluate(arguments, columnIndexes, formula As String) As Boolean
     AllEvaluate = False
     Dim evaluation
-    For Each evaluation In GetEvaluations(arguments, columnNumbers, formula)
+    For Each evaluation In GetEvaluations(arguments, columnIndexes, formula)
         If VarType(evaluation) <> vbBoolean Then Err.Raise 2101, "ArrayEx2.AllEvaluate()", "Should evaluated value boolean, but not boolean: " & evaluation
         If evaluation = False Then Exit Function
     Next
     AllEvaluate = True
 End Function
 
-Public Function AnyEvaluate(arguments, columnNumbers, formula As String) As Boolean
+Public Function AnyEvaluate(arguments, columnIndexes, formula As String) As Boolean
     AnyEvaluate = True
     Dim evaluation
-    For Each evaluation In GetEvaluations(arguments, columnNumbers, formula)
+    For Each evaluation In GetEvaluations(arguments, columnIndexes, formula)
         If evaluation = True Then Exit Function
     Next
     AnyEvaluate = False
 End Function
 
-Public Function WhereEvaluated(arguments, columnNumbers, formula As String) As ArrayEx2
+Public Function WhereEvaluated(arguments, columnIndexes, formula As String) As ArrayEx2
     Dim evaluations, i As Long, indexes As String
-    evaluations = GetEvaluations(arguments, columnNumbers, formula)
-    For i = lb To ub
+    evaluations = GetEvaluations(arguments, columnIndexes, formula)
+    For i = Lb To Ub
         If evaluations(i) = True Then indexes = indexes & i & ","
     Next
     Set WhereEvaluated = ExtractCore(indexes, ":")
 End Function
 
-Public Function SelectEvaluated(arguments, columnNumbers, formula As String) As ArrayEx1
+Public Function SelectEvaluated(arguments, columnIndexes, formula As String) As ArrayEx1
     Dim evaluations, i As Long, j As Long, s As String, indexes As String
-    evaluations = GetEvaluations(arguments, columnNumbers, formula)
+    evaluations = GetEvaluations(arguments, columnIndexes, formula)
     Dim re As New ArrayEx1
     Set SelectEvaluated = re.Init(evaluations)
 End Function
 
 ' DebugPrint
-Public Function DebugPrint(argWithCommna As String, ColumnNumbersWithConnma As String, formulaWithArg As String) As ArrayEx2
+Public Function DebugPrint(argWithCommna As String, columnIndexesWithConnma As String, formulaWithArg As String) As ArrayEx2
     Dim args: args = Split(Replace(argWithCommna, " ", ""), ",")
-    Dim cols: cols = Split(Replace(ColumnNumbersWithConnma, " ", ""), ",")
+    Dim cols: cols = Split(Replace(columnIndexesWithConnma, " ", ""), ",")
     Dim i&, j&, s$
-    For i = lb To ub
+    For i = Lb To Ub
         s = formulaWithArg
         For j = LBound(args) To UBound(args)
             s = Replace(s, args(j), array_(i, val(cols(j))))
@@ -388,24 +357,26 @@ End Function
 
 
 ' Private Methods --------------------------------------------------------------------------------------------
-Private Function ExtractCore(argRows As Variant, argCols As Variant) As ArrayEx2
+Private Function ExtractCore(rowIndexes As Variant, columnIndexes As Variant) As ArrayEx2
     Dim re, rearr As New ArrayEx2
     
-    re = ArrayExCore.ExtractCore(array_, argRows, argCols)
+    re = ArrayExCore.ExtractCore(array_, rowIndexes, columnIndexes)
     
     Set ExtractCore = rearr.Init(re)
 End Function
 
-Private Function GetEvaluations(arguments, columnNumbers, formula As String) As Variant
+Private Function GetEvaluations(arguments, columnIndexes, formula As String) As Variant
     Dim i As Long, j As Long, s As String, indexes As String, re
     Dim args, cols, rearr
     
-    ReDim rearr(lb To ub)
+    ReDim rearr(Lb To Ub)
     args = Split(arguments, ",")
-    cols = Split(columnNumbers, ",")
-    If UBound(args) <> UBound(cols) Then Err.Raise 2002, "ArrayEx2, GetEvaluations", "arguments and columnNumbers count are not same."
+    cols = Split(columnIndexes, ",")
+    If cols(LBound(cols)) < Lb Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(LBound(cols)) & ")."
+    If cols(UBound(cols)) > Ub Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(UBound(cols)) & ")."
+    If UBound(args) <> UBound(cols) Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Number of arguments and columnIndexes are not same."
     
-    For i = lb To ub
+    For i = Lb To Ub
         s = formula
         For j = LBound(args) To UBound(args)
             s = Replace(s, args(j), array_(i, cols(j)))
@@ -414,4 +385,5 @@ Private Function GetEvaluations(arguments, columnNumbers, formula As String) As 
     Next i
     GetEvaluations = rearr
 End Function
+
 

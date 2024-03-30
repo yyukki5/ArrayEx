@@ -72,7 +72,7 @@ Public Function ConvertToDimensionN(arr, dimension As Long)
                         For i = lb2 To ub2: rearr(i) = arr(lb1, i): Next i
         Case 22:    rearr = arr
         Case Else
-            Call Err.Raise(9101, "ArrayExCore.ConvertToDimensionN", "ArrayEx: not supported dimension")
+            Call Err.Raise(9101, "ArrayExCore.ConvertToDimensionN", "not supported dimension")
     End Select
     ConvertToDimensionN = rearr
 End Function
@@ -137,23 +137,46 @@ Public Function ExtractCore(arr, Indexes1 As Variant, Optional Indexes2 As Varia
 End Function
 
 Public Function IndexToArray(index As Variant, low As Long, up As Long) As Variant
-    Dim re
-    If VarType(index) = vbLong Or VarType(index) = vbInteger Then
-        IndexToArray = Array(index)
-        Exit Function
+    Dim re, variantType, indexArray
+    
+    variantType = VarType(index)
+    If variantType > vbArray Then
+        Select Case VarType(index(LBound(index)))
+            Case vbInteger
+                indexArray = index
+            Case vbLong
+                indexArray = index
+            Case vbSingle
+                indexArray = index
+            Case vbDouble
+                indexArray = index
+            Case vbDecimal
+                indexArray = index
+            Case Else
+                Err.Raise 9100, "ArrayExCore.IndexToArray()", "Index is unsupported variant type."
+        End Select
+    Else
+        Select Case variantType
+            Case vbLong
+                indexArray = Array(index)
+            Case vbInteger
+                indexArray = Array(index)
+            Case vbString
+                indexArray = DecodeIndexStringToArray(index, low, up)
+            Case vbObject
+                If TypeName(index) = "Collection" Then
+                    indexArray = GetFromCollection(index)
+                Else
+                    Err.Raise 9100, "ArrayExCore.IndexToArray()", "Index is unsupported variant type (Object)."
+                End If
+            Case Else
+                Err.Raise 9100, "ArrayExCore.IndexToArray()", "Index is unsupported variant type."
+        End Select
     End If
-    If VarType(index) = vbString Then
-        IndexToArray = DecodeIndexStringToArray(index, low, up)
-        Exit Function
-    End If
-    If VarType(index) > vbArray Then
-        IndexToArray = index
-        Exit Function
-    End If
-    If VarType(index) = vbObject Then
-        If TypeName(index) = "Collection" Then: Dim coll As Collection: Set coll = index: _
-            IndexToArray = GetFromCollection(coll)
-    End If
+       
+    If indexArray(LBound(indexArray)) < low Then Err.Raise 9001, "ArrayExCore.IndexToArray()", "Index is invalid(" & low & ")."
+    If indexArray(UBound(indexArray)) > up Then Err.Raise 9001, "ArrayExCore.IndexToArray()", "Index is invalid(." & up & ")."
+    IndexToArray = indexArray
 End Function
 
 Public Function GetFromSpillingRange(rng As Range)
@@ -566,7 +589,7 @@ Private Function StackArray(arrays As Collection, isDirectionColumn As Boolean) 
     StackArray = rearr
 End Function
 
-Private Function GetFromCollection(coll As Collection)
+Private Function GetFromCollection(ByVal coll As Collection)
     Dim c, re, cnt As Long
     cnt = 1
     ReDim re(1 To coll.Count)
@@ -652,8 +675,9 @@ Private Sub GetArrayParameters(ByVal arr, ByRef rnk As Long, ByRef lb1 As Long, 
     If rnk > 1 Then _
         lb2 = LBound(arr, 2): ub2 = UBound(arr, 2): cnt2 = ub2 - lb2 + 1
     If rnk > 2 Then _
-        Err.Raise 9100, "ArrayExCore.GetArrayParameters", "array's dimention is over 2."
+        Err.Raise 9001, "ArrayExCore.GetArrayParameters", "array's dimention is over 2."
 End Sub
+
 
 
 
