@@ -9,22 +9,6 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-'todo Done そもそもcoreにフィールドとして入れると、ExtractCoreとかで更新されるときに、都度更新しないといけないので、困る．．．
-'todo Done 添え字は０でなくてもよくする。が、１出ないとダメなわけでもない。　可変
-'todo Done 添え字をシフトするメソッドの追加
-'todo Done Value は素直に配列を返す
-'todo Done VSTACK, HSTACK の追加
-'todo その他、新関数をArrayExCoreに
-'todo ExtractCoreがArrayExCoreに入るか・・・？
-'todo 要素をCollectionに
-'todo ParamArrayに出来るとこを,ParamArrayに
-'hack 左結合 LeftJoin
-'todo　Done ”:”, "," は定数化
-'todo　debug.print,  toStringのカッコは [ -> { ?
-'hack 全ての組合せを求める
-' todo error message
-'todo Done  Hstack
-
 Private Const COLLON As String = ":"
 Private Const CONNMA As String = ","
 Private Const INDEX_TO As String = "to"
