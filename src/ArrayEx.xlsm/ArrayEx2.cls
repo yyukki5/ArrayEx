@@ -386,4 +386,3 @@ Private Function GetEvaluations(arguments, columnIndexes, formula As String) As 
     GetEvaluations = rearr
 End Function
 
-

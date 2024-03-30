@@ -661,7 +661,3 @@ Private Sub GetArrayParameters(ByVal arr, ByRef rnk As Long, ByRef lb1 As Long, 
     If rnk > 2 Then _
         Err.Raise 9001, "ArrayExCore.GetArrayParameters", "array's dimention is over 2."
 End Sub
-
-
-
-

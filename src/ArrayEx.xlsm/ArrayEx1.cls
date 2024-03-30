@@ -288,4 +288,3 @@ Private Function IsDuplicated(coll As Collection, val) As Boolean
     IsDuplicated = False
 errEqual:
 End Function
-
