@@ -10,10 +10,15 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
-' Init methods              : should be initialize by array.
-' Convert methods           : should return other type object.
-' DebugPrint                : should return current instance. print current array value in immediate window.
-' Wrap default functions    : should return new instance.
+' Project                   : https://github.com/yyukki5/ArrayEx
+' Version                   : 2.0.1
+' Dependencies              : ArrayExCore.cls
+' Features
+'  - Init methods           : should be initialize by array.
+'  - Convert methods        : should return other type object.
+'  - DebugPrint             : should return current instance. print current array value in immediate window.
+'  - Wrap default functions : should return new instance.
+' - ...
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------

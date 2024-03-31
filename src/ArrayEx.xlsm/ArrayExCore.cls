@@ -9,6 +9,20 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+
+' ------------------------------------------------------------------------------------------------------------
+' Project                   : https://github.com/yyukki5/ArrayEx
+' Version                   : 2.0.1
+' Dependencies              : 
+' Features
+' - Rank                    : should return array rank(demension).
+' - RedimPreserve2          : should return array.
+' - TryEvaluate             : should return boolean that is pass or not, and should set value to re.
+' - WorksheetFunction extend: should return array.
+' - ...
+' ------------------------------------------------------------------------------------------------------------
+
+
 Private Const COLLON As String = ":"
 Private Const CONNMA As String = ","
 Private Const INDEX_TO As String = "to"
