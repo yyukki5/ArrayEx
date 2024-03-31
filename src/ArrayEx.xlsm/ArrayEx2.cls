@@ -186,7 +186,7 @@ Public Function ToString() As String
     ToString = s
 End Function
 
-Public Function ToRange(rng As Range)
+Public Function ToRange(rng As Range) as Range
     rng.Resize(Count(1), Count(2)).Value = array_
     Set ToRange = rng.Resize(Count(1), Count(2))
 End Function
