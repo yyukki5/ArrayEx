@@ -10,14 +10,19 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
-' Init methods              : should be initialize by array.
-' Get methods               : should return new instance.
-' Set methods               : should return updated instance.
-' Add methods               : should return new instance.
-' Convert methods           : should return other type object.
-' Linq methods              : should return new instance. some methods useing Evaluate()
-' DebugPrint                : should return current instance. print current array value in immediate window.
-' Wrap default functions    : should return new instance.
+' Project                   : https://github.com/yyukki5/ArrayEx
+' Version                   : 2.0.1
+' Dependencies              : ArrayExCore.cls, ArrayEx0.cls
+' Features
+' - Init methods            : should be initialize by array.
+' - Get methods             : should return new instance.
+' - Set methods             : should return updated instance.
+' - Add methods             : should return new instance.
+' - Convert methods         : should return other type object.
+' - Linq methods            : should return new instance. some methods useing Evaluate()
+' - DebugPrint              : should return current instance. print current array value in immediate window.
+' - Wrap default functions  : should return new instance.
+' - ...
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------
