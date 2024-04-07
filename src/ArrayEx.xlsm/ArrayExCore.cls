@@ -183,7 +183,7 @@ Public Function IndexToArray(index As Variant, low As Long, up As Long) As Varia
     IndexToArray = indexArray
 End Function
 
-Public Function GetFromSpillingRange(rng As Range)
+Public Function GetFromSpillingRange(rng As Object)
     If rng.HasSpill = False Then GetFromSpillingRange = ConvertToDimensionN(rng.Value, 2): Exit Function
     GetFromSpillingRange = rng.SpillingToRange.Value
 End Function
