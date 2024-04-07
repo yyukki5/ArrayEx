@@ -6,10 +6,12 @@
 
 # not using
 .vs/
-bin/old/
 bin/*.xlsm
+bin/old/
+bin/backup/
 vbac.wsf
 *.doccls
+*.bat
 ~$*
 
 # remove files for release

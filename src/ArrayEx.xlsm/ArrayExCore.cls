@@ -12,16 +12,11 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.0.1
-' Dependencies              : 
-' Features
-' - Rank                    : should return array rank(demension).
-' - RedimPreserve2          : should return array.
-' - TryEvaluate             : should return boolean that is pass or not, and should set value to re.
-' - WorksheetFunction extend: should return array.
-' - ...
+' Version                   : 2.1.0
 ' ------------------------------------------------------------------------------------------------------------
 
+Private Const APP_NAME_EXCEL As String = "Microsoft Excel"
+Private Const APP_NAME_ACCESS As String = "Microsoft Access"
 
 Private Const COLLON As String = ":"
 Private Const CONNMA As String = ","
@@ -96,9 +91,15 @@ outLoop:
 End Function
 
 Public Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Boolean
+    Dim app As Object
     TryEvaluate = False: re = Null
 On Error GoTo errEvaluate
-    re = Evaluate(evaluateString)
+    Set app = Application
+    If Application.Name <> APP_NAME_EXCEL Or Application.Name <> APP_NAME_ACCESS Then Err.Raise 9100, "ArrayExCore.TryEvaluete()", "This application not support Evaluate()/Eval()"
+        
+    If Application.Name <> APP_NAME_EXCEL Then re = app.Evaluate(evaluateString)
+    If Application.Name <> APP_NAME_ACCESS Then re = app.Eval(evaluateString)
+    
     If IsError(re) = True Then GoTo errEvaluate
     TryEvaluate = True
 errEvaluate:
@@ -177,7 +178,7 @@ Public Function IndexToArray(index As Variant, low As Long, up As Long) As Varia
     IndexToArray = indexArray
 End Function
 
-Public Function GetFromSpillingRange(rng As Range)
+Public Function GetFromSpillingRange(rng As Object)
     If rng.HasSpill = False Then GetFromSpillingRange = ConvertToDimensionN(rng.Value, 2): Exit Function
     GetFromSpillingRange = rng.SpillingToRange.Value
 End Function
@@ -219,9 +220,9 @@ Public Function TEXTBEFORE(ByVal text As String, delimiter, Optional instance_nu
     txt = text
     Set col = GetSplitStringCollection(txt, delimiters, False, match_mode, instance_num)
     
-    If IsMissing(if_not_found) Then if_not_found = CVErr(xlErrNA)
+    If IsMissing(if_not_found) Then if_not_found = CVErr(2042)
     If col.Count = 1 Then TEXTBEFORE = if_not_found: Exit Function
-    If col.Count < instance_num + 1 Then TEXTBEFORE = CVErr(xlErrNA): Exit Function
+    If col.Count < instance_num + 1 Then TEXTBEFORE = CVErr(2042): Exit Function
     
     TEXTBEFORE = col(IIf(instance_num > 0, instance_num, instance_num * -1))
 End Function
@@ -238,9 +239,9 @@ Public Function TEXTAFTER(ByVal text As String, delimiter, Optional instance_num
     txt = text
     Set col = GetSplitStringCollection(txt, delimiters, False, match_mode, instance_num)
     
-    If IsMissing(if_not_found) Then if_not_found = CVErr(xlErrNA)
+    If IsMissing(if_not_found) Then if_not_found = CVErr(2042)
     If col.Count = 1 Then TEXTAFTER = if_not_found: Exit Function
-    If col.Count < instance_num + 1 Then TEXTAFTER = CVErr(xlErrNA): Exit Function
+    If col.Count < instance_num + 1 Then TEXTAFTER = CVErr(2042): Exit Function
     
     TEXTAFTER = col(IIf(instance_num > 0, instance_num + 1, instance_num * -1))
 End Function
@@ -252,7 +253,7 @@ Public Function TEXTSPLIT(ByVal text As String, col_delimiter As Variant, Option
     Dim rowDelimiters As Collection: Set rowDelimiters = New Collection
     Dim str, txt As String, co, maxcount As Long, strcol As New Collection
     
-    If IsMissing(pad_with) Then pad_with = CVErr(xlErrNA)
+    If IsMissing(pad_with) Then pad_with = CVErr(2042)
     If VarType(col_delimiter) = vbString Then
         columnDelimiters.Add col_delimiter
     Else
@@ -336,9 +337,9 @@ Public Function WRAPROW(ByVal vector, wrap_count As Long, Optional pad_with As V
     
     GetArrayParameters vector, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     vector = ConvertToDimensionN(vector, 2)
-    If lb1 <> ub1 And lb2 <> ub2 Then WRAPROW = CVErr(xlErrValue): Exit Function
-    If wrap_count < 1 Then WRAPROW = CVErr(xlErrNum): Exit Function
-    If IsMissing(pad_with) Then pad_with = CVErr(xlErrNA)
+    If lb1 <> ub1 And lb2 <> ub2 Then WRAPROW = CVErr(2015): Exit Function
+    If wrap_count < 1 Then WRAPROW = CVErr(2036): Exit Function
+    If IsMissing(pad_with) Then pad_with = CVErr(2042)
     lb2 = lb1
     
     WRAPROW = RedimCollectionToArray2D(vector, lb1, lb1 + (Fix(IIf(cnt1 > cnt2, cnt1, cnt2) / wrap_count) + 1) - 1, lb2, lb2 + wrap_count - 1, pad_with)
@@ -348,9 +349,9 @@ Public Function WRAPCOLS(ByVal vector, wrap_count As Long, Optional pad_with As 
     
     GetArrayParameters vector, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     vector = ConvertToDimensionN(vector, 2)
-    If lb1 <> ub1 And lb2 <> ub2 Then WRAPCOLS = CVErr(xlErrValue): Exit Function
-    If wrap_count < 1 Then WRAPCOLS = CVErr(xlErrNum): Exit Function
-    If IsMissing(pad_with) Then pad_with = CVErr(xlErrNA)
+    If lb1 <> ub1 And lb2 <> ub2 Then WRAPCOLS = CVErr(2015): Exit Function
+    If wrap_count < 1 Then WRAPCOLS = CVErr(2036): Exit Function
+    If IsMissing(pad_with) Then pad_with = CVErr(2042)
     lb2 = lb1
     
     WRAPCOLS = RedimCollectionToArray2D(vector, lb1, lb1 + wrap_count - 1, lb2, lb2 + (Fix(IIf(cnt1 > cnt2, cnt1, cnt2) / wrap_count) + 1) - 1, pad_with, False)
@@ -363,7 +364,7 @@ Public Function EXPAND(arr, Optional rows As Variant, Optional columns As Varian
     If IsMissing(rows) Then rows = ub1
     If IsMissing(columns) Then columns = ub2
     If rows < cnt1 Or columns < cnt2 Then Err.Raise 9001, "EXPAND", "Argument is smaller than array size"
-    If IsMissing(pad_with) Then pad_with = CVErr(xlErrNA)
+    If IsMissing(pad_with) Then pad_with = CVErr(2042)
             
     EXPAND = RedimPreserve2(arr, lb1, lb1 + rows - 1, lb2, lb2 + columns - 1, pad_with)
 End Function
@@ -374,8 +375,8 @@ Public Function TAKE(arr, Optional rows As Variant, Optional columns As Variant)
     
     GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     arr = ConvertToDimensionN(arr, 2)
-    If IsMissing(rows) = False Then If rows = 0 Then TAKE = CVErr(xlErrCalc): Exit Function
-    If IsMissing(columns) = False Then If columns = 0 Then TAKE = CVErr(xlErrCalc): Exit Function
+    If IsMissing(rows) = False Then If rows = 0 Then TAKE = CVErr(2050): Exit Function
+    If IsMissing(columns) = False Then If columns = 0 Then TAKE = CVErr(2050): Exit Function
     If IsMissing(rows) Then rows = ub1
     If IsMissing(columns) Then columns = ub2
     
@@ -397,8 +398,8 @@ Public Function DROP(arr, Optional rows As Variant, Optional columns As Variant)
     
     GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     arr = ConvertToDimensionN(arr, 2)
-    If IsMissing(rows) = False Then If rows = 0 Then DROP = CVErr(xlErrCalc): Exit Function
-    If IsMissing(columns) = False Then If columns = 0 Then DROP = CVErr(xlErrCalc): Exit Function
+    If IsMissing(rows) = False Then If rows = 0 Then DROP = CVErr(2050): Exit Function
+    If IsMissing(columns) = False Then If columns = 0 Then DROP = CVErr(2050): Exit Function
     If IsMissing(rows) Then rows = lb1
     If IsMissing(columns) Then columns = lb2
     
@@ -421,7 +422,7 @@ Public Function CHOOSEROWS(arr, ParamArray paramarr()) As Variant()
     GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     arr = ConvertToDimensionN(arr, 2)
     For i = LBound(paramarr, 1) To UBound(paramarr, 1)
-        If paramarr(i) = 0 Or paramarr(i) > cnt1 Then CHOOSEROWS = CVErr(xlErrValue): Exit Function
+        If paramarr(i) = 0 Or paramarr(i) > cnt1 Then CHOOSEROWS = CVErr(2015): Exit Function
         If paramarr(i) > 0 Then indx = lb1 + paramarr(i) - 1 Else indx = ub1 + paramarr(i)
         indexes.Add indx
     Next i
@@ -436,7 +437,7 @@ Public Function CHOOSECOLS(arr, ParamArray paramarr()) As Variant()
     GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     arr = ConvertToDimensionN(arr, 2)
     For i = LBound(paramarr, 1) To UBound(paramarr, 1)
-        If paramarr(i) = 0 Or paramarr(i) > cnt2 Then CHOOSECOLS = CVErr(xlErrValue): Exit Function
+        If paramarr(i) = 0 Or paramarr(i) > cnt2 Then CHOOSECOLS = CVErr(2015): Exit Function
         If paramarr(i) > 0 Then indx = lb2 + paramarr(i) - 1 Else indx = ub2 + paramarr(i)
         indexes.Add indx
     Next i
@@ -571,9 +572,9 @@ Private Function StackArray(arrays As Collection, isDirectionColumn As Boolean) 
     
     For Each paramarr In arrays
         If isDirectionColumn Then
-            paramarr = RedimPreserve2(paramarr, LBound(paramarr, 1), LBound(paramarr, 1) + cnt - 1, LBound(paramarr, 2), UBound(paramarr, 2), CVErr(xlErrNA))
+            paramarr = RedimPreserve2(paramarr, LBound(paramarr, 1), LBound(paramarr, 1) + cnt - 1, LBound(paramarr, 2), UBound(paramarr, 2), CVErr(2042))
         Else
-            paramarr = RedimPreserve2(paramarr, LBound(paramarr, 1), UBound(paramarr, 1), LBound(paramarr, 2), LBound(paramarr, 2) + cnt - 1, CVErr(xlErrNA))
+            paramarr = RedimPreserve2(paramarr, LBound(paramarr, 1), UBound(paramarr, 1), LBound(paramarr, 2), LBound(paramarr, 2) + cnt - 1, CVErr(2042))
         End If
         AddElementsCollection eles, paramarr, Not (isDirectionColumn)
     Next
