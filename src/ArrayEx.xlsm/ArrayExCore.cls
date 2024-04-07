@@ -12,14 +12,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.0.1
-' Dependencies              :
-' Features
-' - Rank                    : should return array rank(demension).
-' - RedimPreserve2          : should return array.
-' - TryEvaluate             : should return boolean that is pass or not, and should set value to re.
-' - WorksheetFunction extend: should return array.
-' - ...
+' Version                   : 2.1.0
 ' ------------------------------------------------------------------------------------------------------------
 
 Private Const APP_NAME_EXCEL As String = "Microsoft Excel"
