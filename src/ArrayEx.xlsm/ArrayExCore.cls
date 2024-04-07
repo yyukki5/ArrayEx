@@ -96,9 +96,15 @@ outLoop:
 End Function
 
 Public Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Boolean
+    Dim app As Object
     TryEvaluate = False: re = Null
 On Error GoTo errEvaluate
-    re = Evaluate(evaluateString)
+    Set app = Application
+    If Application.Name <> "Microsoft Excel" Or Application.Name <> "Microsoft Access" Then Err.Raise 9100, "ArrayExCore.TryEvaluete()", "This application not support Evaluate()/Eval()"
+        
+    If Application.Name <> "Microsoft Excel" Then re = app.Evaluate(evaluateString)
+    If Application.Name <> "Microsoft Access" Then re = app.Eval(evaluateString)
+    
     If IsError(re) = True Then GoTo errEvaluate
     TryEvaluate = True
 errEvaluate:
