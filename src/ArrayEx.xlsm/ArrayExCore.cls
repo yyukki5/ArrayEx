@@ -22,6 +22,8 @@ Option Explicit
 ' - ...
 ' ------------------------------------------------------------------------------------------------------------
 
+Private Const APP_NAME_EXCEL As String = "Microsoft Excel"
+Private Const APP_NAME_ACCESS As String = "Microsoft Access"
 
 Private Const COLLON As String = ":"
 Private Const CONNMA As String = ","
@@ -100,10 +102,10 @@ Public Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Bo
     TryEvaluate = False: re = Null
 On Error GoTo errEvaluate
     Set app = Application
-    If Application.Name <> "Microsoft Excel" Or Application.Name <> "Microsoft Access" Then Err.Raise 9100, "ArrayExCore.TryEvaluete()", "This application not support Evaluate()/Eval()"
+    If Application.Name <> APP_NAME_EXCEL Or Application.Name <> APP_NAME_ACCESS Then Err.Raise 9100, "ArrayExCore.TryEvaluete()", "This application not support Evaluate()/Eval()"
         
-    If Application.Name <> "Microsoft Excel" Then re = app.Evaluate(evaluateString)
-    If Application.Name <> "Microsoft Access" Then re = app.Eval(evaluateString)
+    If Application.Name <> APP_NAME_EXCEL Then re = app.Evaluate(evaluateString)
+    If Application.Name <> APP_NAME_ACCESS Then re = app.Eval(evaluateString)
     
     If IsError(re) = True Then GoTo errEvaluate
     TryEvaluate = True
