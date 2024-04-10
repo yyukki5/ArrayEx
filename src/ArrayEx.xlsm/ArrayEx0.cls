@@ -25,13 +25,8 @@ Option Explicit
 Private array_ As Variant
 
 ' Properties -------------------------------------------------------------------------------------------------
-Public Property Get Value()
-    Value = array_
-End Property
-
-Public Property Let Value(val As Variant)
-    Init val
-End Property
+Public Property Get Value():      Value = array_:       End Property
+Public Property Let Value(val As Variant):  Init val:   End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array0d As Variant) As ArrayEx0
@@ -66,17 +61,14 @@ Public Function Replace(before As String, after As String) As ArrayEx0
     Dim rearr As New ArrayEx0
     Set Replace = rearr.Init(Strings.Replace(array_, before, after))
 End Function
-
 Public Function Left(length As Long) As ArrayEx0
     Dim rearr As New ArrayEx0
     Set Left = rearr.Init(Strings.Left(array_, length))
 End Function
-
 Public Function Right(length As Long) As ArrayEx0
     Dim rearr As New ArrayEx0
     Set Right = rearr.Init(Strings.Right(array_, length))
 End Function
-
 Public Function Mid(start As Long, Optional length As Long = 0) As ArrayEx0
     Dim rearr As New ArrayEx0
     If length = 0 Then

@@ -29,25 +29,12 @@ Option Explicit
 Private array_ As Variant
 
 ' Properties -------------------------------------------------------------------------------------------------
-Public Property Get Value()
-    Value = array_
-End Property
+Public Property Get Value(): Value = array_: End Property
+Public Property Let Value(array1d): Init array1d: End Property
+Public Property Get Ub(): Ub = UBound(array_, 1): End Property
+Public Property Get Lb(): Lb = LBound(array_, 1): End Property
+Public Property Get Count() As Long: Count = UBound(array_, 1) - LBound(array_, 1) + 1: End Property
 
-Public Property Let Value(array1d)
-    Init array1d
-End Property
-
-Public Property Get Ub()
-    Ub = UBound(array_, 1)
-End Property
-
-Public Property Get Lb()
-    Lb = LBound(array_, 1)
-End Property
-
-Public Property Get Count() As Long
-    Count = UBound(array_, 1) - LBound(array_, 1) + 1
-End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array1d As Variant) As ArrayEx1
