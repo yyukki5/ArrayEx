@@ -647,21 +647,21 @@ Private Function GetMaxCount(ByVal col As Collection) As Long
     GetMaxCount = cmax
 End Function
 
-Private Function GetArraysParameters(ByVal arrays, ByRef lb1 As Long, ByRef ub1 As Long, ByRef cnt1 As Long, ByRef lb2 As Long, ByRef ub2 As Long, ByRef cnt2 As Long)
+Private Function GetArraysParameters(ByVal arrays, ByRef l1 As Long, ByRef u1 As Long, ByRef cnt1 As Long, ByRef l2 As Long, ByRef u2 As Long, ByRef cnt2 As Long)
     Dim arr, rnk As Long
 
-    lb1 = 100: lb2 = 100
+    l1 = 100: l2 = 100
     For Each arr In arrays
         rnk = Rank(arr)
         If rnk > 0 Then
-            lb1 = IIf(lb1 > LBound(arr, 1), LBound(arr, 1), lb1)
-            ub1 = IIf(ub1 < UBound(arr, 1), UBound(arr, 1), ub1)
-            cnt1 = ub1 - lb1 + 1
+            l1 = IIf(l1 > LBound(arr, 1), LBound(arr, 1), l1)
+            u1 = IIf(u1 < UBound(arr, 1), UBound(arr, 1), u1)
+            cnt1 = u1 - l1 + 1
         End If
         If rnk > 1 Then
-            lb2 = IIf(lb2 > LBound(arr, 2), LBound(arr, 2), lb2)
-            ub2 = IIf(ub2 < UBound(arr, 2), UBound(arr, 2), ub2)
-            cnt2 = ub2 - lb2 + 1
+            l2 = IIf(l2 > LBound(arr, 2), LBound(arr, 2), l2)
+            u2 = IIf(u2 < UBound(arr, 2), UBound(arr, 2), u2)
+            cnt2 = u2 - l2 + 1
         End If
     Next
 End Function
