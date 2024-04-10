@@ -78,9 +78,11 @@ End Function
 
 ' Add
 Function AddElement(element As ArrayEx0) As ArrayEx1
-    Dim re: re = array_
-    ReDim Preserve re(Lb To Ub + 1)
-    re(Ub + 1) = element.Value
+    Dim re, u As Long, l As Long
+    If IsEmpty(array_) Then re = Array() Else re = array_
+    l = LBound(re): u = UBound(re)
+    ReDim Preserve re(l To u + 1)
+    re(u + 1) = element.Value
     
     Dim rearr As New ArrayEx1
     Set AddElement = rearr.Init(re)
