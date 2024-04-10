@@ -77,6 +77,20 @@ Public Function Mid(start As Long, Optional length As Long = 0) As ArrayEx0
         Set Mid = rearr.Init(Strings.Mid(array_, start, length))
     End If
 End Function
+Public Function Concat(text As String) As ArrayEx0
+    Dim rearr As New ArrayEx0
+    Set Concat = rearr.Init(array_ & text)
+End Function
+
+Public Function Add(a) As ArrayEx0
+    Dim rearr As New ArrayEx0
+    Set Add = rearr.Init(array_ + a)
+End Function
+Public Function Multiple(a) As ArrayEx0
+    Dim rearr As New ArrayEx0
+    If IsNumeric(a) = False Then Err.Raise 9100, "ArrayEx0.Multiple()", "value is not numeric"
+    Set Multiple = rearr.Init(array_ * a)
+End Function
 
 ' [Hack] if need more, add
 
