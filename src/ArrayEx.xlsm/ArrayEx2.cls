@@ -338,8 +338,12 @@ End Function
 
 ' Wrap default functions
 Public Function Transpose() As ArrayEx2
-    Dim rearr As New ArrayEx2
-    Set Transpose = rearr.InitForce(WorksheetFunction.Transpose(array_))
+    Dim re, rearr As New ArrayEx2, i As Long, j As Long
+    
+    ReDim re(Lb2 To Ub2, Lb1 To Ub1)
+    For i = Lb2 To Ub2: For j = Lb1 To Ub1: re(i, j) = array_(j, i): Next j: Next i
+    
+    Set Transpose = rearr.Init(re)
 End Function
 
 Public Function VSTACK(arr, ParamArray paramarr()) As ArrayEx2
