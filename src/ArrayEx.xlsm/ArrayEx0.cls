@@ -13,20 +13,14 @@ Option Explicit
 ' Project                   : https://github.com/yyukki5/ArrayEx
 ' Version                   : 2.0.1
 ' Dependencies              : ArrayExCore.cls
-' Features
-'  - Init methods           : should be initialize by array.
-'  - Convert methods        : should return other type object.
-'  - DebugPrint             : should return current instance. print current array value in immediate window.
-'  - Wrap default functions : should return new instance.
-' - ...
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------
 Private array_ As Variant
 
 ' Properties -------------------------------------------------------------------------------------------------
-Public Property Get Value():      Value = array_:       End Property
-Public Property Let Value(val As Variant):  Init val:   End Property
+Public Property Get Value(): Value = array_: End Property
+Public Property Let Value(val As Variant): Init val: End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array0d As Variant) As ArrayEx0

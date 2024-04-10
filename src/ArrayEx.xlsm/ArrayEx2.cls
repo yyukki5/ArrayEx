@@ -13,35 +13,21 @@ Option Explicit
 ' Project                   : https://github.com/yyukki5/ArrayEx
 ' Version                   : 2.0.1
 ' Dependencies              : ArrayExCore.cls, ArrayEx0.cls, ArrayEx1.cls
-' Features
-' - Init methods            : should be initialize by array.
-' - Get methods             : should return new instance.
-' - Set methods             : should return updated instance.
-' - Add methods             : should return new instance.
-' - Convert methods         : should return other type object.
-' - Linq methods            : should return new instance. some methods useing Evaluate()
-' - DebugPrint              : should return current instance. print current array value in immediate window.
-' - Wrap default functions  : should return new instance.
-' - ...
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------
 Private array_ As Variant
 
 ' Properties -------------------------------------------------------------------------------------------------
-Public Property Get Value():                Value = array_:     End Property
-Public Property Let Value(array2d):      Init array2d:         End Property
-
-Public Property Get Lb1() As Long:     Lb1 = LBound(array_, 1): End Property
-Public Property Get Lb2() As Long:     Lb2 = LBound(array_, 2): End Property
-Public Property Get Ub1() As Long:    Ub1 = UBound(array_, 1): End Property
-Public Property Get Ub2() As Long:    Ub2 = UBound(array_, 2): End Property
+Public Property Get Value(): Value = array_: End Property
+Public Property Let Value(array2d): Init array2d: End Property
+Public Property Get Lb1() As Long: Lb1 = LBound(array_, 1): End Property
+Public Property Get Lb2() As Long: Lb2 = LBound(array_, 2): End Property
+Public Property Get Ub1() As Long: Ub1 = UBound(array_, 1): End Property
+Public Property Get Ub2() As Long: Ub2 = UBound(array_, 2): End Property
 Public Property Get Count1() As Long: Count1 = UBound(array_, 1) - LBound(array_, 1) + 1: End Property
 Public Property Get Count2() As Long: Count2 = UBound(array_, 2) - LBound(array_, 2) + 1: End Property
-'Public Property Get Ub(Optional direction As Long = 1) As Long:   Ub = UBound(array_, direction): End Property
-'Public Property Get Lb(Optional direction As Long = 1) As Long:    Lb = LBound(array_, direction): End Property
-'Public Property Get Count(Optional direction As Long = 1) As Long:     Count = UBound(array_, direction) - LBound(array_, direction) + 1: End Property
-Public Property Get Rank() As Long:    Rank = 2: End Property
+Public Property Get Rank() As Long: Rank = 2: End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array2d As Variant) As ArrayEx2
