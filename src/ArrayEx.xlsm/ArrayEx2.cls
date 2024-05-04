@@ -11,12 +11,13 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.0.1
+' Version                   : 2.1.0
 ' Dependencies              : ArrayExCore.cls, ArrayEx0.cls, ArrayEx1.cls
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------
 Private array_ As Variant
+
 
 ' Properties -------------------------------------------------------------------------------------------------
 Public Property Get Value(): Value = array_: End Property
@@ -121,7 +122,7 @@ End Function
 
 Function GetRow(rowIndex As Long) As ArrayEx1
     Dim re, rearr As New ArrayEx1
-    
+
     re = ArrayExCore.ConvertToDimensionN(ExtractCore(rowIndex, ":").Value, 1)
     
     Set GetRow = rearr.Init(re)
@@ -131,7 +132,6 @@ Public Function GetColumn(columnIndex As Long) As ArrayEx1
     Dim re, rearr As New ArrayEx1
     
     re = ArrayExCore.ConvertToDimensionN(ExtractCore(":", columnIndex).Transpose.Value, 1)
-'    re = ExtractCore(":", col).Value
     
     Set GetColumn = rearr.Init(re)
 End Function
@@ -169,11 +169,6 @@ Public Function ToString() As String
     ToString = s
 End Function
 
-Public Function ToRange(rng As Range) As Range
-    rng.Resize(Count1, Count2).Value = array_
-    Set ToRange = rng.Resize(Count1, Count2)
-End Function
-
 Public Function ToCollection(Optional dimension As Long = 0) As Collection
     Dim coll As New Collection
     Dim arr0 As ArrayEx0, arr1 As ArrayEx1
@@ -198,6 +193,11 @@ Public Function ToCollection(Optional dimension As Long = 0) As Collection
             Next
     End Select
     Set ToCollection = coll
+End Function
+
+Public Function SetExcelRange(rng As Object) As Object
+    rng.Resize(Count1, Count2).Value = array_
+    Set SetExcelRange = rng.Resize(Count1, Count2)
 End Function
 
 ' Linqs
@@ -236,25 +236,12 @@ Public Function Distinct(columnIndex As Long) As ArrayEx2
     Set Distinct = ExtractCore(sIndexes, ":")
 End Function
 
-Private Function IsDuplicated(coll As Collection, val) As Boolean
-    Dim col
-    On Error GoTo errEqual
-    IsDuplicated = True
-    For Each col In coll
-        If col = val Then Exit Function
-    Next
-    IsDuplicated = False
-errEqual:
-End Function
-
-Public Function OrderBy(columnIndex As Long) As ArrayEx2
-    Dim re As New ArrayEx2
-    Set OrderBy = re.Init(WorksheetFunction.Sort(array_, columnIndex))
+Public Function OrderByAscending(columnIndex As Long) As ArrayEx2
+    Dim re As New ArrayEx2:    Set OrderByAscending = re.Init(Sort(array_, columnIndex, True))
 End Function
 
 Public Function OrderByDescending(columnIndex As Long) As ArrayEx2
-    Dim re As New ArrayEx2
-    Set OrderByDescending = re.Init(WorksheetFunction.Sort(array_, columnIndex, -1, False))
+    Dim re As New ArrayEx2:    Set OrderByDescending = re.Init(Sort(array_, columnIndex, False))
 End Function
 
 Public Function Reverse() As ArrayEx2
@@ -324,7 +311,6 @@ Public Function DebugPrintAll() As ArrayEx2
     Set DebugPrintAll = Me
 End Function
 
-' Wrap default functions
 Public Function Transpose() As ArrayEx2
     Dim re, rearr As New ArrayEx2, i As Long, j As Long
     
@@ -333,14 +319,15 @@ Public Function Transpose() As ArrayEx2
     
     Set Transpose = rearr.Init(re)
 End Function
-
 Public Function VSTACK(arr, ParamArray paramarr()) As ArrayEx2
-    Dim aex2 As New ArrayEx2
-    Set VSTACK = aex2.Init(ArrayExCore.VSTACK(array_, arr, paramarr))
+    Dim aex2 As New ArrayEx2:    Set VSTACK = aex2.Init(ArrayExCore.VSTACK(array_, arr, paramarr))
 End Function
 
+Public Function HSTACK(arr, ParamArray paramarr()) As ArrayEx2
+    Dim aex2 As New ArrayEx2:    Set HSTACK = aex2.Init(ArrayExCore.HSTACK(array_, arr, paramarr))
+End Function
 
-
+' [Hack] Wrap default functions. Better to use app.*** in case of depending on application function.
 
 
 ' Private Methods --------------------------------------------------------------------------------------------
@@ -371,5 +358,50 @@ Private Function GetEvaluations(arguments, columnIndexes, formula As String) As 
         If ArrayExCore.TryEvaluate(s, re) Then rearr(i) = re Else Err.Raise 2003, "ArrayEx2.GetEvaluations()", "String in evaluate() is error :" & s & "."
     Next i
     GetEvaluations = rearr
+End Function
+
+Private Function IsDuplicated(coll As Collection, val) As Boolean
+    Dim col
+    On Error GoTo errEqual
+    IsDuplicated = True
+    For Each col In coll
+        If col = val Then Exit Function
+    Next
+    IsDuplicated = False
+errEqual:
+End Function
+
+Private Function Sort(ByVal arr, col As Long, isAsc As Boolean) As Variant
+    QuickSort arr, LBound(arr, 1), UBound(arr, 1), isAsc, col
+    Sort = arr
+End Function
+
+Private Function QuickSort(ByRef arr As Variant, ByVal low As Long, ByVal up As Long, isAsc As Boolean, col As Long)
+    Dim i As Long, j As Long, k As Long, pivot As Variant, temp As Variant
+    i = low
+    j = up
+    pivot = arr((low + up) \ 2, col)
+    
+    Do While i <= j
+        If isAsc Then
+            Do While arr(i, col) < pivot: i = i + 1: Loop
+            Do While arr(j, col) > pivot: j = j - 1: Loop
+        Else
+            Do While arr(i, col) > pivot: i = i + 1: Loop
+            Do While arr(j, col) < pivot: j = j - 1: Loop
+        End If
+        If i <= j Then
+            For k = LBound(arr, 2) To UBound(arr, 2)
+                temp = arr(i, k)
+                arr(i, k) = arr(j, k)
+                arr(j, k) = temp
+            Next k
+            i = i + 1
+            j = j - 1
+        End If
+    Loop
+    If low < j Then QuickSort arr, low, j, isAsc, col
+    If i < up Then QuickSort arr, i, up, isAsc, col
+    QuickSort = arr
 End Function
 

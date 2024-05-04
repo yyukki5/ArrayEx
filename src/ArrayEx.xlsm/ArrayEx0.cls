@@ -11,12 +11,13 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.0.1
+' Version                   : 2.1.0
 ' Dependencies              : ArrayExCore.cls
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------
 Private array_ As Variant
+
 
 ' Properties -------------------------------------------------------------------------------------------------
 Public Property Get Value(): Value = array_: End Property
@@ -86,7 +87,7 @@ Public Function Multiple(a) As ArrayEx0
     Set Multiple = rearr.Init(array_ * a)
 End Function
 
-' [Hack] if need more, add
+' [Hack] Wrap default functions. Better to use app.*** in case of depending on application function.
 
 
 ' Private Methods --------------------------------------------------------------------------------------------

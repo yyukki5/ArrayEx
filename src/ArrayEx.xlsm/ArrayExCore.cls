@@ -73,7 +73,7 @@ End Function
 Public Function RedimPreserve2(arr, lbound1 As Long, ubound1 As Long, lbound2 As Long, ubound2 As Long, Optional blnk As Variant = "") As Variant()
     Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim rearr As Variant, cnti, cntj
-    
+
     ReDim rearr(lbound1 To ubound1, lbound2 To ubound2)
     SetValueToAllElement rearr, blnk
     GetArrayParameters arr, rnk, l, u, c
@@ -94,10 +94,10 @@ Public Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Bo
     Dim app As Object
     
     TryEvaluate = False: re = Null
-On Error GoTo errEvaluate
     Set app = Application
     If Application.Name = APP_NAME_EXCEL Or Application.Name = APP_NAME_ACCESS Then Else Err.Raise 9100, "ArrayExCore.TryEvaluete()", "This application not support Evaluate()/Eval()"
-        
+    
+On Error GoTo errEvaluate
     If Application.Name = APP_NAME_EXCEL Then re = app.Evaluate(evaluateString)
     If Application.Name = APP_NAME_ACCESS Then re = app.Eval(evaluateString)
     
@@ -208,7 +208,6 @@ End Function
 
 
 ' WorksheetFucntions extended -----------------------
-
 Public Function TEXTBEFORE(ByVal text As String, delimiter, Optional instance_num As Long = 1, Optional match_mode As Long = 0, Optional match_end As Long = 0, Optional if_not_found As Variant)
     Dim str, strIndex As Long, txt As String, col
     Dim delimiters As Collection: Set delimiters = New Collection
