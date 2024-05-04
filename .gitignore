@@ -6,13 +6,16 @@
 
 # not using
 .vs/
-bin/*.xlsm
+bin/*
 bin/old/
 bin/backup/
+src/*.accdb/*
+src/*.docm/*
 vbac.wsf
 *.doccls
 *.bat
 ~$*
+
 
 # remove files for release
 UnitTest.cls

@@ -11,27 +11,17 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.0.1
+' Version                   : 2.1.0
 ' Dependencies              : ArrayExCore.cls
-' Features
-'  - Init methods           : should be initialize by array.
-'  - Convert methods        : should return other type object.
-'  - DebugPrint             : should return current instance. print current array value in immediate window.
-'  - Wrap default functions : should return new instance.
-' - ...
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------
 Private array_ As Variant
 
-' Properties -------------------------------------------------------------------------------------------------
-Public Property Get Value()
-    Value = array_
-End Property
 
-Public Property Let Value(val As Variant)
-    Init val
-End Property
+' Properties -------------------------------------------------------------------------------------------------
+Public Property Get Value(): Value = array_: End Property
+Public Property Let Value(val As Variant): Init val: End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array0d As Variant) As ArrayEx0
@@ -66,17 +56,14 @@ Public Function Replace(before As String, after As String) As ArrayEx0
     Dim rearr As New ArrayEx0
     Set Replace = rearr.Init(Strings.Replace(array_, before, after))
 End Function
-
 Public Function Left(length As Long) As ArrayEx0
     Dim rearr As New ArrayEx0
     Set Left = rearr.Init(Strings.Left(array_, length))
 End Function
-
 Public Function Right(length As Long) As ArrayEx0
     Dim rearr As New ArrayEx0
     Set Right = rearr.Init(Strings.Right(array_, length))
 End Function
-
 Public Function Mid(start As Long, Optional length As Long = 0) As ArrayEx0
     Dim rearr As New ArrayEx0
     If length = 0 Then
@@ -85,8 +72,22 @@ Public Function Mid(start As Long, Optional length As Long = 0) As ArrayEx0
         Set Mid = rearr.Init(Strings.Mid(array_, start, length))
     End If
 End Function
+Public Function Concat(text As String) As ArrayEx0
+    Dim rearr As New ArrayEx0
+    Set Concat = rearr.Init(array_ & text)
+End Function
 
-' [Hack] if need more, add
+Public Function Add(a) As ArrayEx0
+    Dim rearr As New ArrayEx0
+    Set Add = rearr.Init(array_ + a)
+End Function
+Public Function Multiple(a) As ArrayEx0
+    Dim rearr As New ArrayEx0
+    If IsNumeric(a) = False Then Err.Raise 9100, "ArrayEx0.Multiple()", "value is not numeric"
+    Set Multiple = rearr.Init(array_ * a)
+End Function
+
+' [Hack] Wrap default functions. Better to use app.*** in case of depending on application function.
 
 
 ' Private Methods --------------------------------------------------------------------------------------------

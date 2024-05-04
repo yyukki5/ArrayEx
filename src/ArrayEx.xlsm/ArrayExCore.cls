@@ -46,23 +46,23 @@ outLoop:
 End Function
 
 Public Function ConvertToDimensionN(arr, dimension As Long)
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim rearr, key As Long
     
     Validate arr
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     key = 10 * rnk + dimension
     Select Case key
         Case 0:     rearr = arr
         Case 1:     ReDim rearr(0): rearr(0) = arr
         Case 2:     ReDim rearr(0, 0): rearr(0, 0) = arr
-        Case 10:    rearr = arr(lb1)
+        Case 10:    rearr = arr(l(1))
         Case 11:    rearr = arr
-        Case 12:   ReDim rearr(0, lb1 To ub1)
-                        For i = lb1 To ub1: rearr(0, i) = arr(i): Next i
-        Case 20:    rearr = arr(lb1, lb1)
-        Case 21:   ReDim rearr(lb2 To ub2)
-                        For i = lb2 To ub2: rearr(i) = arr(lb1, i): Next i
+        Case 12:    ReDim rearr(0, l(1) To u(1))
+                    For i = l(1) To u(1): rearr(0, i) = arr(i): Next i
+        Case 20:    rearr = arr(l(1), l(1))
+        Case 21:    ReDim rearr(l(2) To u(2))
+                    For i = l(2) To u(2): rearr(i) = arr(l(1), i): Next i
         Case 22:    rearr = arr
         Case Else
             Call Err.Raise(9101, "ArrayExCore.ConvertToDimensionN", "not supported dimension")
@@ -71,17 +71,17 @@ Public Function ConvertToDimensionN(arr, dimension As Long)
 End Function
 
 Public Function RedimPreserve2(arr, lbound1 As Long, ubound1 As Long, lbound2 As Long, ubound2 As Long, Optional blnk As Variant = "") As Variant()
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim rearr As Variant, cnti, cntj
-    
+
     ReDim rearr(lbound1 To ubound1, lbound2 To ubound2)
     SetValueToAllElement rearr, blnk
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     For cnti = 0 To ubound1 - lbound1
-        If ub1 < lb1 + cnti Then GoTo outLoop
+        If u(1) < l(1) + cnti Then GoTo outLoop
         For cntj = 0 To ubound2 - lbound2
-            If ub2 < lb2 + cntj Then GoTo nextj
-            rearr(lbound1 + cnti, lbound2 + cntj) = arr(lb1 + cnti, lb2 + cntj)
+            If u(2) < l(2) + cntj Then GoTo nextj
+            rearr(lbound1 + cnti, lbound2 + cntj) = arr(l(1) + cnti, l(2) + cntj)
         Next cntj
 nextj:
     Next cnti
@@ -92,13 +92,14 @@ End Function
 
 Public Function TryEvaluate(evaluateString As String, ByRef re As Variant) As Boolean
     Dim app As Object
+    
     TryEvaluate = False: re = Null
-On Error GoTo errEvaluate
     Set app = Application
-    If Application.Name <> APP_NAME_EXCEL Or Application.Name <> APP_NAME_ACCESS Then Err.Raise 9100, "ArrayExCore.TryEvaluete()", "This application not support Evaluate()/Eval()"
-        
-    If Application.Name <> APP_NAME_EXCEL Then re = app.Evaluate(evaluateString)
-    If Application.Name <> APP_NAME_ACCESS Then re = app.Eval(evaluateString)
+    If Application.Name = APP_NAME_EXCEL Or Application.Name = APP_NAME_ACCESS Then Else Err.Raise 9100, "ArrayExCore.TryEvaluete()", "This application not support Evaluate()/Eval()"
+    
+On Error GoTo errEvaluate
+    If Application.Name = APP_NAME_EXCEL Then re = app.Evaluate(evaluateString)
+    If Application.Name = APP_NAME_ACCESS Then re = app.Eval(evaluateString)
     
     If IsError(re) = True Then GoTo errEvaluate
     TryEvaluate = True
@@ -106,24 +107,25 @@ errEvaluate:
 End Function
 
 Public Function ExtractCore(arr, Indexes1 As Variant, Optional Indexes2 As Variant) As Variant
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim index1, index2, ii, jj, re
     
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
-    ii = lb1: jj = lb2
+    GetArrayParameters arr, rnk, l, u, c
     Select Case rnk
     Case 0
         re = arr
     Case 1
-        index1 = IndexToArray(Indexes1, lb1, ub1)
-        ReDim re(lb1 To lb1 + UBound(index1) - LBound(index1))
+        ii = l(1)
+        index1 = IndexToArray(Indexes1, l(1), u(1))
+        ReDim re(l(1) To l(1) + UBound(index1) - LBound(index1))
         For i = LBound(index1) To UBound(index1): re(ii) = arr(index1(i)): ii = ii + 1: Next i
     Case 2
-        index1 = IndexToArray(Indexes1, lb1, ub1)
-        index2 = IndexToArray(Indexes2, lb2, ub2)
-        ReDim re(lb1 To lb1 + UBound(index1) - LBound(index1), lb2 To lb2 + UBound(index2) - LBound(index2))
+        ii = l(1): jj = l(2)
+        index1 = IndexToArray(Indexes1, l(1), u(1))
+        index2 = IndexToArray(Indexes2, l(2), u(2))
+        ReDim re(l(1) To l(1) + UBound(index1) - LBound(index1), l(2) To l(2) + UBound(index2) - LBound(index2))
         For i = LBound(index1) To UBound(index1)
-            jj = lb2
+            jj = l(2)
             For j = LBound(index2) To UBound(index2)
                 re(ii, jj) = arr(index1(i), index2(j))
                 jj = jj + 1
@@ -184,21 +186,21 @@ Public Function GetFromSpillingRange(rng As Object)
 End Function
 
 Public Function ShiftIndex(arr, addIndex1 As Long, Optional addIndex2 As Long = 0)
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim rearr
     
     Validate arr
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     If rnk = 0 Then Err.Raise "ArrayExCore.ShiftIndex", "Need dimension more 0"
-    If rnk > 0 Then If lb1 + addIndex1 < 0 Then Err.Raise 9001, "ArrayExCore.ShiftIndex", "Need lbound1 index 0 or more"
-    If rnk > 1 Then If lb2 + addIndex2 < 0 Then Err.Raise 9001, "ArrayExCore.ShiftIndex", "Need lbound2 index 0 or more"
+    If rnk > 0 Then If l(1) + addIndex1 < 0 Then Err.Raise 9001, "ArrayExCore.ShiftIndex", "Need lbound1 index 0 or more"
+    If rnk > 1 Then If l(2) + addIndex2 < 0 Then Err.Raise 9001, "ArrayExCore.ShiftIndex", "Need lbound2 index 0 or more"
 
     If rnk = 1 Then
-        ReDim rearr(lb1 + addIndex1 To ub1 + addIndex1)
-        For i = lb1 + addIndex1 To ub1 + addIndex1:  rearr(i) = arr(i - lb1): Next i
+        ReDim rearr(l(1) + addIndex1 To u(1) + addIndex1)
+        For i = l(1) + addIndex1 To u(1) + addIndex1:  rearr(i) = arr(i - l(1)): Next i
     End If
     If rnk = 2 Then
-        rearr = RedimPreserve2(arr, lb1 + addIndex1, ub1 + addIndex1, lb2 + addIndex2, ub2 + addIndex2)
+        rearr = RedimPreserve2(arr, l(1) + addIndex1, u(1) + addIndex1, l(2) + addIndex2, u(2) + addIndex2)
     End If
     
     ShiftIndex = rearr
@@ -206,7 +208,6 @@ End Function
 
 
 ' WorksheetFucntions extended -----------------------
-
 Public Function TEXTBEFORE(ByVal text As String, delimiter, Optional instance_num As Long = 1, Optional match_mode As Long = 0, Optional match_end As Long = 0, Optional if_not_found As Variant)
     Dim str, strIndex As Long, txt As String, col
     Dim delimiters As Collection: Set delimiters = New Collection
@@ -299,11 +300,11 @@ Public Function VSTACK(array1, ParamArray paramarrs())
     VSTACK = StackArray(arrays, False)
 End Function
 Public Function TOROW(arr, Optional ignore As Long = 0, Optional scan_by_column As Boolean = False)
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim rearr, ele As Variant, coll As Collection
     Set coll = New Collection
     
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
     For Each ele In GetElementsCollection(arr, Not (scan_by_column))
         If ignore = 1 And IsEmpty(ele) Then GoTo nextStep
@@ -313,14 +314,14 @@ Public Function TOROW(arr, Optional ignore As Long = 0, Optional scan_by_column 
 nextStep:
     Next
     
-    TOROW = RedimCollectionToArray2D(coll, lb1, lb1, lb2, lb2 + coll.Count - 1)
+    TOROW = RedimCollectionToArray2D(coll, l(1), l(1), l(2), l(2) + coll.Count - 1)
 End Function
 Public Function TOCOL(arr, Optional ignore As Long = 0, Optional scan_by_column As Boolean = False)
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim rearr, ele As Variant, coll As Collection
     
     Set coll = New Collection
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
     For Each ele In GetElementsCollection(arr, Not (scan_by_column))
         If ignore = 1 And IsEmpty(ele) Then GoTo nextStep
@@ -330,115 +331,115 @@ Public Function TOCOL(arr, Optional ignore As Long = 0, Optional scan_by_column 
 nextStep:
     Next
        
-    TOCOL = RedimCollectionToArray2D(coll, lb1, lb1 + coll.Count - 1, lb2, lb2)
+    TOCOL = RedimCollectionToArray2D(coll, l(1), l(1) + coll.Count - 1, l(2), l(2))
 End Function
 Public Function WRAPROW(ByVal vector, wrap_count As Long, Optional pad_with As Variant)
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     
-    GetArrayParameters vector, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     vector = ConvertToDimensionN(vector, 2)
-    If lb1 <> ub1 And lb2 <> ub2 Then WRAPROW = CVErr(2015): Exit Function
+    GetArrayParameters vector, rnk, l, u, c
+    If l(1) <> u(1) And l(2) <> u(2) Then WRAPROW = CVErr(2015): Exit Function
     If wrap_count < 1 Then WRAPROW = CVErr(2036): Exit Function
     If IsMissing(pad_with) Then pad_with = CVErr(2042)
-    lb2 = lb1
+    l(2) = l(1)
     
-    WRAPROW = RedimCollectionToArray2D(vector, lb1, lb1 + (Fix(IIf(cnt1 > cnt2, cnt1, cnt2) / wrap_count) + 1) - 1, lb2, lb2 + wrap_count - 1, pad_with)
+    WRAPROW = RedimCollectionToArray2D(vector, l(1), l(1) + (Fix(IIf(c(1) > c(2), c(1), c(2)) / wrap_count) + 1) - 1, l(2), l(2) + wrap_count - 1, pad_with)
 End Function
 Public Function WRAPCOLS(ByVal vector, wrap_count As Long, Optional pad_with As Variant)
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     
-    GetArrayParameters vector, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
     vector = ConvertToDimensionN(vector, 2)
-    If lb1 <> ub1 And lb2 <> ub2 Then WRAPCOLS = CVErr(2015): Exit Function
+    GetArrayParameters vector, rnk, l, u, c
+    If l(1) <> u(1) And l(2) <> u(2) Then WRAPCOLS = CVErr(2015): Exit Function
     If wrap_count < 1 Then WRAPCOLS = CVErr(2036): Exit Function
     If IsMissing(pad_with) Then pad_with = CVErr(2042)
-    lb2 = lb1
+    l(2) = l(1)
     
-    WRAPCOLS = RedimCollectionToArray2D(vector, lb1, lb1 + wrap_count - 1, lb2, lb2 + (Fix(IIf(cnt1 > cnt2, cnt1, cnt2) / wrap_count) + 1) - 1, pad_with, False)
+    WRAPCOLS = RedimCollectionToArray2D(vector, l(1), l(1) + wrap_count - 1, l(2), l(2) + (Fix(IIf(c(1) > c(2), c(1), c(2)) / wrap_count) + 1) - 1, pad_with, False)
 End Function
 Public Function EXPAND(arr, Optional rows As Variant, Optional columns As Variant, Optional pad_with As Variant)
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
-    If IsMissing(rows) Then rows = ub1
-    If IsMissing(columns) Then columns = ub2
-    If rows < cnt1 Or columns < cnt2 Then Err.Raise 9001, "EXPAND", "Argument is smaller than array size"
+    If IsMissing(rows) Then rows = u(1)
+    If IsMissing(columns) Then columns = u(2)
+    If rows < c(1) Or columns < c(2) Then Err.Raise 9001, "EXPAND", "Argument is smaller than array size"
     If IsMissing(pad_with) Then pad_with = CVErr(2042)
             
-    EXPAND = RedimPreserve2(arr, lb1, lb1 + rows - 1, lb2, lb2 + columns - 1, pad_with)
+    EXPAND = RedimPreserve2(arr, l(1), l(1) + rows - 1, l(2), l(2) + columns - 1, pad_with)
 End Function
 Public Function TAKE(arr, Optional rows As Variant, Optional columns As Variant) As Variant
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim c1 As Collection: Set c1 = New Collection
     Dim c2 As Collection: Set c2 = New Collection
     
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
     If IsMissing(rows) = False Then If rows = 0 Then TAKE = CVErr(2050): Exit Function
     If IsMissing(columns) = False Then If columns = 0 Then TAKE = CVErr(2050): Exit Function
-    If IsMissing(rows) Then rows = ub1
-    If IsMissing(columns) Then columns = ub2
+    If IsMissing(rows) Then rows = u(1)
+    If IsMissing(columns) Then columns = u(2)
     
-    For i = lb1 To ub1
+    For i = l(1) To u(1)
         If rows >= 0 And i - rows <= 0 Then c1.Add i
-        If rows < 0 And i - (ub1 + rows) > 0 Then c1.Add i
+        If rows < 0 And i - (u(1) + rows) > 0 Then c1.Add i
     Next i
-    For j = lb2 To ub2
+    For j = l(2) To u(2)
         If columns >= 0 And j - columns <= 0 Then c2.Add j
-        If columns < 0 And j - (ub2 + columns) > 0 Then c2.Add j
+        If columns < 0 And j - (u(2) + columns) > 0 Then c2.Add j
     Next j
     
     TAKE = ExtractCore(arr, c1, c2)
 End Function
 Public Function DROP(arr, Optional rows As Variant, Optional columns As Variant) As Variant
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim c1 As Collection: Set c1 = New Collection
     Dim c2 As Collection: Set c2 = New Collection
     
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
     If IsMissing(rows) = False Then If rows = 0 Then DROP = CVErr(2050): Exit Function
     If IsMissing(columns) = False Then If columns = 0 Then DROP = CVErr(2050): Exit Function
-    If IsMissing(rows) Then rows = lb1
-    If IsMissing(columns) Then columns = lb2
+    If IsMissing(rows) Then rows = l(1)
+    If IsMissing(columns) Then columns = l(2)
     
-    For i = lb1 To ub1
+    For i = l(1) To u(1)
         If rows >= 0 And i - rows > 0 Then c1.Add i
-        If rows < 0 And i - (ub1 + rows) > 0 Then c1.Add i
+        If rows < 0 And i - (u(1) + rows) > 0 Then c1.Add i
     Next i
-    For j = lb2 To ub2
+    For j = l(2) To u(2)
         If columns >= 0 And j - columns > 0 Then c2.Add j
-        If columns < 0 And j - (ub2 + columns) > 0 Then c2.Add j
+        If columns < 0 And j - (u(2) + columns) > 0 Then c2.Add j
     Next j
     
     DROP = ExtractCore(arr, c1, c2)
 End Function
 Public Function CHOOSEROWS(arr, ParamArray paramarr()) As Variant()
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim indexes As Collection: Set indexes = New Collection
     Dim indx As Long
     
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
     For i = LBound(paramarr, 1) To UBound(paramarr, 1)
-        If paramarr(i) = 0 Or paramarr(i) > cnt1 Then CHOOSEROWS = CVErr(2015): Exit Function
-        If paramarr(i) > 0 Then indx = lb1 + paramarr(i) - 1 Else indx = ub1 + paramarr(i)
+        If paramarr(i) = 0 Or paramarr(i) > c(1) Then CHOOSEROWS = CVErr(2015): Exit Function
+        If paramarr(i) > 0 Then indx = l(1) + paramarr(i) - 1 Else indx = u(1) + paramarr(i)
         indexes.Add indx
     Next i
     
     CHOOSEROWS = ExtractCore(arr, indexes, ":")
 End Function
 Public Function CHOOSECOLS(arr, ParamArray paramarr()) As Variant()
-    Dim i As Long, j As Long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim indexes As Collection: Set indexes = New Collection
     Dim indx As Long
     
-    GetArrayParameters arr, rnk, lb1, ub1, cnt1, lb2, ub2, cnt2
+    GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
     For i = LBound(paramarr, 1) To UBound(paramarr, 1)
-        If paramarr(i) = 0 Or paramarr(i) > cnt2 Then CHOOSECOLS = CVErr(2015): Exit Function
-        If paramarr(i) > 0 Then indx = lb2 + paramarr(i) - 1 Else indx = ub2 + paramarr(i)
+        If paramarr(i) = 0 Or paramarr(i) > c(2) Then CHOOSECOLS = CVErr(2015): Exit Function
+        If paramarr(i) > 0 Then indx = l(2) + paramarr(i) - 1 Else indx = u(2) + paramarr(i)
         indexes.Add indx
     Next i
     
@@ -645,34 +646,32 @@ Private Function GetMaxCount(ByVal col As Collection) As Long
     GetMaxCount = cmax
 End Function
 
-Private Function GetArraysParameters(ByVal arrays, ByRef lb1 As Long, ByRef ub1 As Long, ByRef cnt1 As Long, ByRef lb2 As Long, ByRef ub2 As Long, ByRef cnt2 As Long)
+Private Function GetArraysParameters(ByVal arrays, ByRef l1 As Long, ByRef u1 As Long, ByRef cnt1 As Long, ByRef l2 As Long, ByRef u2 As Long, ByRef cnt2 As Long)
     Dim arr, rnk As Long
 
-    lb1 = 100: lb2 = 100
+    l1 = 100: l2 = 100
     For Each arr In arrays
         rnk = Rank(arr)
         If rnk > 0 Then
-            lb1 = IIf(lb1 > LBound(arr, 1), LBound(arr, 1), lb1)
-            ub1 = IIf(ub1 < UBound(arr, 1), UBound(arr, 1), ub1)
-            cnt1 = ub1 - lb1 + 1
+            l1 = IIf(l1 > LBound(arr, 1), LBound(arr, 1), l1)
+            u1 = IIf(u1 < UBound(arr, 1), UBound(arr, 1), u1)
+            cnt1 = u1 - l1 + 1
         End If
         If rnk > 1 Then
-            lb2 = IIf(lb2 > LBound(arr, 2), LBound(arr, 2), lb2)
-            ub2 = IIf(ub2 < UBound(arr, 2), UBound(arr, 2), ub2)
-            cnt2 = ub2 - lb2 + 1
+            l2 = IIf(l2 > LBound(arr, 2), LBound(arr, 2), l2)
+            u2 = IIf(u2 < UBound(arr, 2), UBound(arr, 2), u2)
+            cnt2 = u2 - l2 + 1
         End If
     Next
 End Function
 
-Private Sub GetArrayParameters(ByVal arr, ByRef rnk As Long, ByRef lb1 As Long, ByRef ub1 As Long, ByRef cnt1 As Long, ByRef lb2 As Long, ByRef ub2 As Long, ByRef cnt2 As Long)
-'    Dim i as long, j as long, rnk As Long, lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt1 As Long, cnt2 As Long
+Private Sub GetArrayParameters(ByVal arr, ByRef rnk As Long, ByRef l() As Long, ByRef u() As Long, ByRef c() As Long)
+'    Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
+    Dim i As Long: i = 1
     rnk = Rank(arr)
-    If rnk = 0 Then _
-        Exit Sub
-    If rnk > 0 Then _
-        lb1 = LBound(arr, 1): ub1 = UBound(arr, 1): cnt1 = ub1 - lb1 + 1
-    If rnk > 1 Then _
-        lb2 = LBound(arr, 2): ub2 = UBound(arr, 2): cnt2 = ub2 - lb2 + 1
-    If rnk > 2 Then _
-        Err.Raise 9001, "ArrayExCore.GetArrayParameters", "array's dimention is over 2."
+    Do While i <= rnk
+        ReDim Preserve l(1 To i): ReDim Preserve u(1 To i): ReDim Preserve c(1 To i)
+        l(i) = LBound(arr, i): u(i) = UBound(arr, i): c(i) = u(i) - l(i) + 1
+        i = i + 1
+    Loop
 End Sub

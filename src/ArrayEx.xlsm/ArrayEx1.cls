@@ -11,43 +11,21 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.0.1
+' Version                   : 2.1.0
 ' Dependencies              : ArrayExCore.cls, ArrayEx0.cls
-' Features
-' - Init methods            : should be initialize by array.
-' - Get methods             : should return new instance.
-' - Set methods             : should return updated instance.
-' - Add methods             : should return new instance.
-' - Convert methods         : should return other type object.
-' - Linq methods            : should return new instance. some methods useing Evaluate()
-' - DebugPrint              : should return current instance. print current array value in immediate window.
-' - Wrap default functions  : should return new instance.
-' - ...
 ' ------------------------------------------------------------------------------------------------------------
 
 ' Fields -----------------------------------------------------------------------------------------------------
 Private array_ As Variant
 
+
 ' Properties -------------------------------------------------------------------------------------------------
-Public Property Get Value()
-    Value = array_
-End Property
+Public Property Get Value(): Value = array_: End Property
+Public Property Let Value(array1d): Init array1d: End Property
+Public Property Get Ub(): Ub = UBound(array_, 1): End Property
+Public Property Get Lb(): Lb = LBound(array_, 1): End Property
+Public Property Get Count() As Long: Count = UBound(array_, 1) - LBound(array_, 1) + 1: End Property
 
-Public Property Let Value(array1d)
-    Init array1d
-End Property
-
-Public Property Get Ub()
-    Ub = UBound(array_, 1)
-End Property
-
-Public Property Get Lb()
-    Lb = LBound(array_, 1)
-End Property
-
-Public Property Get Count() As Long
-    Count = UBound(array_, 1) - LBound(array_, 1) + 1
-End Property
 
 ' Public Methods ---------------------------------------------------------------------------------------------
 Public Function Init(array1d As Variant) As ArrayEx1
@@ -91,9 +69,11 @@ End Function
 
 ' Add
 Function AddElement(element As ArrayEx0) As ArrayEx1
-    Dim re: re = array_
-    ReDim Preserve re(Lb To Ub + 1)
-    re(Ub + 1) = element.Value
+    Dim re, u As Long, l As Long
+    If IsEmpty(array_) Then re = Array() Else re = array_
+    l = LBound(re): u = UBound(re)
+    ReDim Preserve re(l To u + 1)
+    re(u + 1) = element.Value
     
     Dim rearr As New ArrayEx1
     Set AddElement = rearr.Init(re)
@@ -110,11 +90,6 @@ Public Function ToString() As String
     ToString = s
 End Function
 
-Public Function ToRange(rng As Range) As Range
-    rng.Resize(1, Count).Value = array_
-    Set ToRange = rng.Resize(1, Count)
-End Function
-
 Public Function ToCollection() As Collection
     Dim coll As New Collection
     Dim arr As ArrayEx0
@@ -126,6 +101,11 @@ Public Function ToCollection() As Collection
     Next i
 
     Set ToCollection = coll
+End Function
+
+Public Function SetExcelRange(rng As Object) As Object
+    rng.Resize(1, Count).Value = array_
+    Set SetExcelRange = rng.Resize(1, Count)
 End Function
 
 ' linqs
@@ -172,12 +152,12 @@ End Function
 
 Public Function OrderByAscending() As ArrayEx1
     Dim re As New ArrayEx1
-    Set OrderByAscending = re.Init(WorksheetFunction.Sort(array_))
+    Set OrderByAscending = re.Init(Sort(array_, True))
 End Function
 
 Public Function OrderByDescending() As ArrayEx1
     Dim re As New ArrayEx1
-    Set OrderByDescending = re.Init(WorksheetFunction.Sort(array_, , -1, True))
+    Set OrderByDescending = re.Init(Sort(array_, False))
 End Function
 
 Public Function Reverse() As ArrayEx1
@@ -242,27 +222,40 @@ Public Function DebugPrint(formulaWithArgumentX As String) As ArrayEx1
     Set DebugPrint = Me
 End Function
 
-' Wrap default functions
-Public Function Match(arg, Optional matchType As Long = 0) As Long
-    Match = WorksheetFunction.Match(arg, array_, matchType)
+Public Function Match(arg, Optional matchType As Long = 0) As ArrayEx0
+    Dim re As New ArrayEx0
+    Set Match = re.Init(ArrayMatch(arg, array_, matchType))
 End Function
 
-Public Function Max() As Variant
-    Max = WorksheetFunction.Max(array_)
+Public Function Max() As ArrayEx0
+    Dim re As New ArrayEx0, val, temp
+    temp = array_(LBound(array_))
+    For Each val In array_
+        If val > temp Then temp = val
+    Next
+    Set Max = re.Init(temp)
+End Function
+Public Function Min() As ArrayEx0
+    Dim re As New ArrayEx0, val, temp
+    temp = array_(LBound(array_))
+    For Each val In array_
+        If val < temp Then temp = val
+    Next
+    Set Min = re.Init(temp)
+End Function
+Public Function Sum() As ArrayEx0
+    Dim re As New ArrayEx0, val, temp
+    For Each val In array_
+        temp = temp + val
+    Next
+    Set Sum = re.Init(temp)
+End Function
+Public Function Average() As ArrayEx0
+    Dim re As New ArrayEx0
+    Set Average = re.Init((Sum.Value / Count))
 End Function
 
-Public Function Min() As Variant
-    Min = WorksheetFunction.Min(array_)
-End Function
-
-Public Function Sum() As Variant
-    Sum = WorksheetFunction.Sum(array_)
-End Function
-
-'Average
-Public Function Average() As Variant
-    Average = WorksheetFunction.Average(array_)
-End Function
+' [Hack] Wrap default functions. Better to use app.*** in case of depending on application function.
 
 
 ' Private Methods ------------------------------------------------------------------
@@ -293,3 +286,52 @@ Private Function IsDuplicated(coll As Collection, val) As Boolean
     IsDuplicated = False
 errEqual:
 End Function
+
+Function ArrayMatch(val As Variant, arr As Variant, matchType As Long) As Variant
+    Dim v, i As Long
+    
+    For i = LBound(arr) To UBound(arr)
+        v = arr(i)
+        Select Case matchType
+            Case 1: If v > val Then ArrayMatch = i - 1: Exit For
+            Case 0: If v = val Then ArrayMatch = i: Exit For
+            Case -1: If v < val Then ArrayMatch = i - 1: Exit For
+            Case Else:      Err.Raise 9101, "ArrayMatch", "undefined matchType value"
+        End Select
+    Next i
+    If ArrayMatch < LBound(arr) Or ArrayMatch > UBound(arr) Then Err.Raise 9101, "ArrayMatch", "Can not find value"
+End Function
+
+Private Function Sort(ByVal arr, isAsc As Boolean) As Variant
+    QuickSort arr, LBound(arr), UBound(arr), isAsc
+    Sort = arr
+End Function
+
+Private Function QuickSort(ByRef arr As Variant, ByVal low As Long, ByVal up As Long, isAsc As Boolean)
+    Dim i As Long, j As Long, pivot As Variant, temp As Variant
+    i = low
+    j = up
+    pivot = arr((low + up) \ 2)
+    
+    Do While i <= j
+        If isAsc Then
+            Do While arr(i) < pivot: i = i + 1: Loop
+            Do While arr(j) > pivot: j = j - 1: Loop
+        Else
+            Do While arr(i) > pivot: i = i + 1: Loop
+            Do While arr(j) < pivot: j = j - 1: Loop
+        End If
+        If i <= j Then
+            temp = arr(i)
+            arr(i) = arr(j)
+            arr(j) = temp
+            i = i + 1
+            j = j - 1
+        End If
+    Loop
+    If low < j Then QuickSort arr, low, j, isAsc
+    If i < up Then QuickSort arr, i, up, isAsc
+    QuickSort = arr
+End Function
+
+
