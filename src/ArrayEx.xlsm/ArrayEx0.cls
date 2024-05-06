@@ -41,8 +41,8 @@ Public Function Equals(arrayEx0d As ArrayEx0) As Boolean
 End Function
 
 ' Convert
-Public Function ToString(Optional formatText As String = "", Optional FirstDayOfWeek As Long = vbSunday, Optional FirstWeekOfYear As Long = vbFirstJan1) As String
-    ToString = Format(CStr(array_), formatText, FirstDayOfWeek, FirstWeekOfYear)
+Public Function ToString(Optional formatText, Optional FirstDayOfWeek As VbDayOfWeek = vbSunday, Optional FirstWeekOfYear As VbFirstWeekOfYear = vbFirstJan1) As String
+    ToString = Strings.Format(CStr(array_), IIf(IsMissing(formatText), "", formatText), FirstDayOfWeek, FirstWeekOfYear)
 End Function
 
 ' Debug
