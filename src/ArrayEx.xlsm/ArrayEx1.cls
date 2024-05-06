@@ -287,7 +287,7 @@ Private Function IsDuplicated(coll As Collection, val) As Boolean
 errEqual:
 End Function
 
-Function ArrayMatch(val As Variant, arr As Variant, matchType As Long) As Variant
+Private Function ArrayMatch(val As Variant, arr As Variant, matchType As Long) As Variant
     Dim v, i As Long
     
     For i = LBound(arr) To UBound(arr)
