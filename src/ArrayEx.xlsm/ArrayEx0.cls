@@ -52,29 +52,31 @@ Public Function DebugPrint() As ArrayEx0
 End Function
 
 ' wrap default functions
+
+' Strings
+Public Function Format(Optional formatText, Optional FirstDayOfWeek As VbDayOfWeek = vbSunday, Optional FirstWeekOfYear As VbFirstWeekOfYear = vbFirstJan1) As ArrayEx0
+    Dim rearr As New ArrayEx0:     Set Format = rearr.Init(Strings.Format(CStr(array_), IIf(IsMissing(formatText), "", formatText), FirstDayOfWeek, FirstWeekOfYear))
+End Function
 Public Function Replace(before As String, after As String) As ArrayEx0
-    Dim rearr As New ArrayEx0
-    Set Replace = rearr.Init(Strings.Replace(array_, before, after))
+    Dim rearr As New ArrayEx0:    Set Replace = rearr.Init(Strings.Replace(array_, before, after))
 End Function
 Public Function Left(length As Long) As ArrayEx0
-    Dim rearr As New ArrayEx0
-    Set Left = rearr.Init(Strings.Left(array_, length))
+    Dim rearr As New ArrayEx0:    Set Left = rearr.Init(Strings.Left(array_, length))
 End Function
 Public Function Right(length As Long) As ArrayEx0
-    Dim rearr As New ArrayEx0
-    Set Right = rearr.Init(Strings.Right(array_, length))
+    Dim rearr As New ArrayEx0:    Set Right = rearr.Init(Strings.Right(array_, length))
 End Function
-Public Function Mid(start As Long, Optional length As Long = 0) As ArrayEx0
-    Dim rearr As New ArrayEx0
-    If length = 0 Then
-        Set Mid = rearr.Init(Strings.Mid(array_, start))
-    Else
-        Set Mid = rearr.Init(Strings.Mid(array_, start, length))
-    End If
+Public Function Mid(start As Long, Optional length) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set Mid = rearr.Init(Strings.Mid(array_, start, IIf(IsMissing(length), Strings.Len(array_), length)))
 End Function
 Public Function Concat(text As String) As ArrayEx0
-    Dim rearr As New ArrayEx0
-    Set Concat = rearr.Init(array_ & text)
+    Dim rearr As New ArrayEx0:    Set Concat = rearr.Init(array_ & text)
+End Function
+Public Function InStr(Optional start, Optional string2, Optional compare As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set InStr = rearr.Init(Strings.InStr(IIf(IsNumeric(start), start, 1), array_, IIf(IsNumeric(start), string2, start), compare))
+End Function
+Public Function StrConv(Conversion As VbStrConv) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set StrConv = rearr.Init(Strings.StrConv(array_, Conversion))
 End Function
 
 Public Function Add(a) As ArrayEx0
