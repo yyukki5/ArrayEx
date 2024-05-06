@@ -144,15 +144,12 @@ End Function
 
 ' Add
 Function AddRow(rowArrayEx1 As ArrayEx1) As ArrayEx2
-    Dim rearr As New ArrayEx2
-    If IsEmpty(array_) Then Set AddRow = rearr.InitForce(rowArrayEx1.Value) _
-    Else Set AddRow = rearr.InitForce(ArrayExCore.VSTACK(array_, rowArrayEx1.Value))
+    If IsEmpty(array_) Then Set AddRow = Me.InitForce(rowArrayEx1.Value) Else Set AddRow = Me.InitForce(ArrayExCore.VSTACK(array_, rowArrayEx1.Value))
 End Function
 
 Function AddColumn(colArrayEx1 As ArrayEx1) As ArrayEx2
-    Dim rearr As New ArrayEx2, col As New ArrayEx2
-    If IsEmpty(array_) Then Set AddColumn = rearr.InitForce(colArrayEx1.Value).Transpose _
-    Else Set AddColumn = rearr.InitForce(ArrayExCore.HSTACK(array_, col.InitForce(colArrayEx1.Value).Transpose.Value))
+    Dim ae2 As New ArrayEx2
+    If IsEmpty(array_) Then Set AddColumn = Me.InitForce(colArrayEx1.Value).Transpose Else Set AddColumn = Me.InitForce(ArrayExCore.HSTACK(array_, ae2.InitForce(colArrayEx1.Value).Transpose.Value))
 End Function
 
 ' Convert
