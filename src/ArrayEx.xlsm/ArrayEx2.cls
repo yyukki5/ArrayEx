@@ -11,7 +11,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.1.0
+' Version                   : 2.2.0
 ' Dependencies              : ArrayExCore.cls, ArrayEx0.cls, ArrayEx1.cls
 ' ------------------------------------------------------------------------------------------------------------
 
@@ -144,15 +144,12 @@ End Function
 
 ' Add
 Function AddRow(rowArrayEx1 As ArrayEx1) As ArrayEx2
-    Dim rearr As New ArrayEx2
-    If IsEmpty(array_) Then Set AddRow = rearr.InitForce(rowArrayEx1.Value) _
-    Else Set AddRow = rearr.InitForce(ArrayExCore.VSTACK(array_, rowArrayEx1.Value))
+    If IsEmpty(array_) Then Set AddRow = Me.InitForce(rowArrayEx1.Value) Else Set AddRow = Me.InitForce(ArrayExCore.VSTACK(array_, rowArrayEx1.Value))
 End Function
 
 Function AddColumn(colArrayEx1 As ArrayEx1) As ArrayEx2
-    Dim rearr As New ArrayEx2, col As New ArrayEx2
-    If IsEmpty(array_) Then Set AddColumn = rearr.InitForce(colArrayEx1.Value).Transpose _
-    Else Set AddColumn = rearr.InitForce(ArrayExCore.HSTACK(array_, col.InitForce(colArrayEx1.Value).Transpose.Value))
+    Dim ae2 As New ArrayEx2
+    If IsEmpty(array_) Then Set AddColumn = Me.InitForce(colArrayEx1.Value).Transpose Else Set AddColumn = Me.InitForce(ArrayExCore.HSTACK(array_, ae2.InitForce(colArrayEx1.Value).Transpose.Value))
 End Function
 
 ' Convert
@@ -346,8 +343,8 @@ Private Function GetEvaluations(arguments, columnIndexes, formula As String) As 
     ReDim rearr(Lb1 To Ub1)
     args = Split(arguments, ",")
     cols = Split(columnIndexes, ",")
-    If cols(LBound(cols)) < Lb1 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(LBound(cols)) & ")."
-    If cols(UBound(cols)) > Ub1 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(UBound(cols)) & ")."
+    If cols(LBound(cols)) < Lb2 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(LBound(cols)) & ")."
+    If cols(UBound(cols)) > Ub2 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(UBound(cols)) & ")."
     If UBound(args) <> UBound(cols) Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Number of arguments and columnIndexes are not same."
     
     For i = Lb1 To Ub1

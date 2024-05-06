@@ -11,7 +11,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.1.0
+' Version                   : 2.2.0
 ' Dependencies              : ArrayExCore.cls, ArrayEx0.cls
 ' ------------------------------------------------------------------------------------------------------------
 
@@ -68,15 +68,13 @@ Public Function GetElement(index As Long) As ArrayEx0
 End Function
 
 ' Add
-Function AddElement(element As ArrayEx0) As ArrayEx1
-    Dim re, u As Long, l As Long
-    If IsEmpty(array_) Then re = Array() Else re = array_
-    l = LBound(re): u = UBound(re)
-    ReDim Preserve re(l To u + 1)
-    re(u + 1) = element.Value
-    
-    Dim rearr As New ArrayEx1
-    Set AddElement = rearr.Init(re)
+Public Function AddElement(element As ArrayEx0) As ArrayEx1
+    If IsEmpty(array_) Then
+        array_ = Array(element.Value)
+    Else
+        ReDim Preserve array_(Lb To Ub + 1): array_(Ub) = element.Value
+    End If
+    Set AddElement = Me
 End Function
 
 ' Convert
@@ -287,7 +285,7 @@ Private Function IsDuplicated(coll As Collection, val) As Boolean
 errEqual:
 End Function
 
-Function ArrayMatch(val As Variant, arr As Variant, matchType As Long) As Variant
+Private Function ArrayMatch(val As Variant, arr As Variant, matchType As Long) As Variant
     Dim v, i As Long
     
     For i = LBound(arr) To UBound(arr)
