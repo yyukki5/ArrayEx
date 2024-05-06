@@ -582,9 +582,9 @@ Private Function StackArray(arrays As Collection, isDirectionColumn As Boolean) 
     
     array1 = arrays(1)
     If isDirectionColumn Then
-        rearr = RedimCollectionToArray2D(eles, LBound(array1, 1), LBound(array1, 1) + cnt - 1, LBound(array1, 2), eles.Count / cnt, , Not (isDirectionColumn))
+        rearr = RedimCollectionToArray2D(eles, LBound(array1, 1), LBound(array1, 1) + cnt - 1, LBound(array1, 2), LBound(array1, 2) + (eles.Count / cnt) - 1, , Not (isDirectionColumn))
     Else
-        rearr = RedimCollectionToArray2D(eles, LBound(array1, 1), eles.Count / cnt, LBound(array1, 2), LBound(array1, 2) + cnt - 1, , Not (isDirectionColumn))
+        rearr = RedimCollectionToArray2D(eles, LBound(array1, 1), LBound(array1, 1) + (eles.Count / cnt) - 1, LBound(array1, 2), LBound(array1, 2) + cnt - 1, , Not (isDirectionColumn))
     End If
     StackArray = rearr
 End Function
