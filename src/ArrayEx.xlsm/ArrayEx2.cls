@@ -346,8 +346,8 @@ Private Function GetEvaluations(arguments, columnIndexes, formula As String) As 
     ReDim rearr(Lb1 To Ub1)
     args = Split(arguments, ",")
     cols = Split(columnIndexes, ",")
-    If cols(LBound(cols)) < Lb1 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(LBound(cols)) & ")."
-    If cols(UBound(cols)) > Ub1 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(UBound(cols)) & ")."
+    If cols(LBound(cols)) < Lb2 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(LBound(cols)) & ")."
+    If cols(UBound(cols)) > Ub2 Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Column number is out of array index (" & cols(UBound(cols)) & ")."
     If UBound(args) <> UBound(cols) Then Err.Raise 2002, "ArrayEx2.GetEvaluations()", "Number of arguments and columnIndexes are not same."
     
     For i = Lb1 To Ub1
