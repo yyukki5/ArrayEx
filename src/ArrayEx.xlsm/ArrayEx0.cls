@@ -44,6 +44,22 @@ End Function
 Public Function ToString(Optional formatText, Optional FirstDayOfWeek As VbDayOfWeek = vbSunday, Optional FirstWeekOfYear As VbFirstWeekOfYear = vbFirstJan1) As String
     ToString = Strings.Format(CStr(array_), IIf(IsMissing(formatText), "", formatText), FirstDayOfWeek, FirstWeekOfYear)
 End Function
+Public Function ConvertTo(t As VbVarType) As ArrayEx0
+    Dim rearr As New ArrayEx0, re
+    Select Case t
+        Case VbVarType.vbBoolean:    Set ConvertTo = rearr.Init(CBool(array_))
+        Case VbVarType.vbByte:       Set ConvertTo = rearr.Init(CByte(array_))
+        Case VbVarType.vbDouble:     Set ConvertTo = rearr.Init(CDbl(array_))
+        Case VbVarType.vbCurrency:   Set ConvertTo = rearr.Init(CCur(array_))
+        Case VbVarType.vbDate:      Set ConvertTo = rearr.Init(CDate(array_))
+        Case VbVarType.vbDecimal:   Set ConvertTo = rearr.Init(CDec(array_))
+        Case VbVarType.vbInteger:   Set ConvertTo = rearr.Init(CInt(array_))
+        Case VbVarType.vbLong:      Set ConvertTo = rearr.Init(CLng(array_))
+        Case VbVarType.vbSingle:    Set ConvertTo = rearr.Init(CSng(array_))
+        Case VbVarType.vbString:    Set ConvertTo = rearr.Init(CStr(array_))
+        Case Else:                  Set ConvertTo = rearr.Init(array_)
+    End Select
+End Function
 
 ' Debug
 Public Function DebugPrint() As ArrayEx0
