@@ -91,9 +91,34 @@ End Function
 Public Function InStr(Optional start, Optional string2, Optional compare As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As ArrayEx0
     Dim rearr As New ArrayEx0:    Set InStr = rearr.Init(Strings.InStr(IIf(IsNumeric(start), start, 1), array_, IIf(IsNumeric(start), string2, start), compare))
 End Function
+Public Function InStrRev(stringmatch, Optional start As Long = -1, Optional compare As VbCompareMethod = vbBinaryCompare) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set InStrRev = rearr.Init(Strings.InStrRev(array_, stringmatch, start, compare))
+End Function
+Public Function StrComp(str, Optional compare As VbCompareMethod = vbBinaryCompare) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set StrComp = rearr.Init(Strings.StrComp(array_, str, compare))
+End Function
 Public Function StrConv(Conversion As VbStrConv) As ArrayEx0
     Dim rearr As New ArrayEx0:    Set StrConv = rearr.Init(Strings.StrConv(array_, Conversion))
 End Function
+Public Function StrReverse() As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set StrReverse = rearr.Init(Strings.StrReverse(CStr(array_)))
+End Function
+Public Function Asc() As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set Asc = rearr.Init(Strings.Asc(CStr(array_)))
+End Function
+Public Function Chr() As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set Chr = rearr.Init(Strings.Chr(CLng(array_)))
+End Function
+Public Function Trim() As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set Trim = rearr.Init(Strings.Trim(array_))
+End Function
+Public Function LTrim() As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set LTrim = rearr.Init(Strings.LTrim(array_)):
+End Function
+Public Function RTrim() As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set RTrim = rearr.Init(Strings.RTrim(array_)):
+End Function
+
 
 Public Function Add(a) As ArrayEx0
     Dim rearr As New ArrayEx0
