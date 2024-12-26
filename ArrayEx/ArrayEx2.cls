@@ -11,7 +11,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.3.0
+' Version                   : 2.1.0
 ' Dependencies              : ArrayExCore.cls, ArrayEx0.cls, ArrayEx1.cls
 ' ------------------------------------------------------------------------------------------------------------
 
@@ -210,8 +210,8 @@ Public Function Skip(skipIndex As Long) As ArrayEx2
     Set Skip = ExtractCore(Lb1 + skipIndex & ":" & Ub1, ":")
 End Function
 
-Public Function TAKE(skipIndex As Long) As ArrayEx2
-    Set TAKE = ExtractCore(Lb1 & ":" & skipIndex + Lb1 - 1, ":")
+Public Function Take(skipIndex As Long) As ArrayEx2
+    Set Take = ExtractCore(Lb1 & ":" & skipIndex + Lb1 - 1, ":")
 End Function
 
 Public Function Distinct(columnIndex As Long) As ArrayEx2
@@ -284,6 +284,16 @@ Public Function SelectEvaluated(arguments, columnIndexes, formula As String) As 
     evaluations = GetEvaluations(arguments, columnIndexes, formula)
     Dim re As New ArrayEx1
     Set SelectEvaluated = re.Init(evaluations)
+End Function
+
+Public Function EachEvaluated(argument, formula As String) As ArrayEx2
+    Dim i As Long, j As Long, re As ArrayEx2, s, val, rearr: rearr = array_
+    For i = Lb1 To Ub1
+        For j = Lb2 To Ub2
+            If ArrayExCore.TryEvaluate(Replace(formula, argument, rearr(i, j)), val) Then rearr(i, j) = val
+        Next j
+    Next i
+    Set EachEvaluated = re.Init(rearr)
 End Function
 
 ' DebugPrint

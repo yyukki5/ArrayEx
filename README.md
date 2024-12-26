@@ -58,3 +58,22 @@ C#のメソッドチェーンのように書けると嬉しいなぁというア
 
 いつも夜中に作っていたので、ミスっていたら申し訳ございません...
 I'm sleepy zzZ
+
+
+
+# ArrEx
+Simplified ArrayEx
+
+~~~ vba
+val1 = ArrEx(val) _
+        .SelectBy(aexRow, 1, 2, 3) _ 
+        .SelectBy(aexColumn, 2, 3) _
+        .WhereBy(1, aexEqual, 2, aexRow) _ 
+        .RedimArr(0, 0) _
+        .Left(3) _
+        .Replace("abc", "def") _
+        .Value
+~~~
+
+## Japanese Note
+一つのクラスで全てを片づけるよ
