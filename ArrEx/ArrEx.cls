@@ -222,9 +222,9 @@ End Function
 Public Function ShiftIndex(add_index1 As Long, Optional add_index2 As Long) As ArrEx
     Dim rearr, i As Long, j As Long
     
-    If rank_ = 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrEx.ShiftIndex", "Need dimension more 0")
-    If rank_ > 0 Then If lb1_ + add_index1 < 0 Then Call Err.Raise(9001, "ArrEx.ShiftIndex", "Need add_index1 is 0 or more")
-    If rank_ > 1 Then If lb2_ + add_index2 < 0 Then Call Err.Raise(9001, "ArrEx.ShiftIndex", "Need add_index2 is 0 or more")
+    If rank_ = 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrEx.ShiftIndex()", "Need dimension more 0")
+    If rank_ > 0 Then If lb1_ + add_index1 < 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.ShiftIndex()", "Need add_index1 is 0 or more")
+    If rank_ > 1 Then If lb2_ + add_index2 < 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.ShiftIndex()", "Need add_index2 is 0 or more")
 
     If rank_ = 1 Then
         ReDim rearr(lb1_ + add_index1 To ub1_ + add_index1)
@@ -410,7 +410,7 @@ Public Function OrderBy(Optional column_index As Variant) As ArrEx
     ElseIf rank_ = 1 Then
         Set OrderBy = Create(Sort1Dim(value_, True))
     ElseIf rank_ = 2 Then
-        If IsMissing(column_index) Then Call Err.Raise(1004, "ArrEx.OrderBy()", "missing column_index")
+        If IsMissing(column_index) Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.OrderBy()", "missing column_index")
         Set OrderBy = Create(Sort2Dim(value_, CLng(column_index), True))
     End If
 End Function
@@ -421,7 +421,7 @@ Public Function OrderByDescending(Optional column_index As Long) As ArrEx
     ElseIf rank_ = 1 Then
         Set OrderByDescending = Create(Sort1Dim(value_, False))
     ElseIf rank_ = 2 Then
-        If IsMissing(column_index) Then Call Err.Raise(1004, "ArrEx.OrderByDescending()", "missing column_index")
+        If IsMissing(column_index) Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.OrderByDescending()", "missing column_index")
         Set OrderByDescending = Create(Sort2Dim(value_, CLng(column_index), False))
     End If
 End Function
@@ -751,7 +751,7 @@ Public Function Plus(val As Variant) As ArrEx
     Set Plus = Create(CollectionToArray(col, rank_))
     Exit Function
 errl:
-    Call Err.Raise(Err.Number, Err.Source & vbCrLf & "at Arr.Plus()", Err.Description)
+    Call Err.Raise(Err.Number, Err.Source & vbCrLf & "at ArrEx.Plus()", Err.Description)
 End Function
 
 
@@ -780,7 +780,6 @@ Public Function DebugPrint(Optional column_delimiter As String = ",") As ArrEx
     End If
     Set DebugPrint = Me
 End Function
-
 
 
 ' private functions -------------------------------------------------------------------
