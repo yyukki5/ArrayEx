@@ -11,7 +11,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.3.0
+' Version                   : 2.1.0
 ' Dependencies              : ArrayExCore.cls, ArrayEx0.cls
 ' ------------------------------------------------------------------------------------------------------------
 
@@ -128,8 +128,8 @@ Public Function Skip(skipIndex As Long) As ArrayEx1
     Set Skip = ExtractCore(Lb + skipIndex & ":" & Ub)
 End Function
 
-Public Function TAKE(takeIndex As Long) As ArrayEx1
-    Set TAKE = ExtractCore(Lb & ":" & takeIndex + Lb - 1)
+Public Function Take(takeIndex As Long) As ArrayEx1
+    Set Take = ExtractCore(Lb & ":" & takeIndex + Lb - 1)
 End Function
 
 Public Function Distinct() As ArrayEx1
@@ -211,11 +211,10 @@ Public Function DebugPrintAll() As ArrayEx1
     Set DebugPrintAll = Me
 End Function
 
-Public Function DebugPrint(formulaWithArgumentX As String) As ArrayEx1
+Public Function DebugPrint(Optional formatString As String = "") As ArrayEx1
     Dim i&, s$
     For i = Lb To Ub
-        s = Replace(formulaWithArgumentX, "{x}", array_(i))
-        Debug.Print s
+        Debug.Print Format(array_(i), formatString)
     Next i
     Set DebugPrint = Me
 End Function

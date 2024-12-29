@@ -12,7 +12,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.3.0
+' Version                   : 2.1.0
 ' ------------------------------------------------------------------------------------------------------------
 
 Private Const APP_NAME_EXCEL As String = "Microsoft Excel"
@@ -369,15 +369,15 @@ Public Function EXPAND(arr, Optional rows As Variant, Optional columns As Varian
             
     EXPAND = RedimPreserve2(arr, l(1), l(1) + rows - 1, l(2), l(2) + columns - 1, pad_with)
 End Function
-Public Function TAKE(arr, Optional rows As Variant, Optional columns As Variant) As Variant
+Public Function Take(arr, Optional rows As Variant, Optional columns As Variant) As Variant
     Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long
     Dim c1 As Collection: Set c1 = New Collection
     Dim c2 As Collection: Set c2 = New Collection
     
     GetArrayParameters arr, rnk, l, u, c
     arr = ConvertToDimensionN(arr, 2)
-    If IsMissing(rows) = False Then If rows = 0 Then TAKE = CVErr(2050): Exit Function
-    If IsMissing(columns) = False Then If columns = 0 Then TAKE = CVErr(2050): Exit Function
+    If IsMissing(rows) = False Then If rows = 0 Then Take = CVErr(2050): Exit Function
+    If IsMissing(columns) = False Then If columns = 0 Then Take = CVErr(2050): Exit Function
     If IsMissing(rows) Then rows = u(1)
     If IsMissing(columns) Then columns = u(2)
     
@@ -390,7 +390,7 @@ Public Function TAKE(arr, Optional rows As Variant, Optional columns As Variant)
         If columns < 0 And j - (u(2) + columns) > 0 Then c2.Add j
     Next j
     
-    TAKE = ExtractCore(arr, c1, c2)
+    Take = ExtractCore(arr, c1, c2)
 End Function
 Public Function DROP(arr, Optional rows As Variant, Optional columns As Variant) As Variant
     Dim i As Long, j As Long, rnk As Long, l() As Long, u() As Long, c() As Long

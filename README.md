@@ -1,13 +1,66 @@
+# ArrEx
+Simplified ArrayEx.  
+This class to extension of using Array, by some functions.
+
+~~~ vba
+val1 = ArrEx(val) _
+        .RedimPreserve(aexRank2, 1, 4, 1, 5) _
+        .WhereBy(2, aexGreaterThan, 2) _
+        .OrderByDescending(1) _
+        .SelectRows(1, 2) _
+        .SelectColumns(2, 3) _
+        .LeftJoin(HelloWorlds, 1, 1) _
+        .SelectColumns(4) _
+        .DebugPrint("," & vbTab)
+~~~
+
+## Features
+1. Predeclared.
+1. Create() is default function, return new instance.
+1. By predeclared and Create(), no need to create instance for using.
+1. Supporting dimension 0, 1, 2. Not supporting greater than 2.
+1. Some functions return new instance of ArrEx. These can be used chain method.
+1. Property Value() returns value.
+1. Immutable
+
+*Specification may be changed until version 1.0.0. 
+
+### Methods
+- RedimPreserve()
+- SelectColumns(), SelectRows()
+- WhereBy()
+- Skip(), Take()
+- OrderBy(), OrderByDescending()
+- Distinct(), DistinctBy()
+- VerticalStack(), HorizontalStack()
+- XLookUp()
+- InnerJoin(), LeftJoin(), FullOuterJoin(), CrossJoin()
+- ...
+
+
+## Japanese Note
+ArrayExをもとにColExのアイディアで作り直したもの。  
+こちらは次元でクラスを分けずに一つのクラスで実装。  
+PredeclaredでCreate()をデフォルトにしているので短い記述で使えます。  
+個人的に配列関係で便利だなと思うメソッドを実装しています。  
+Initialize() 以外のSetter が無いImmutable な実装にしています。  
+
+
+
+
+
+
 # ArrayEx
-Extension class of Array. this can use any functions to support using.
+(Old design, To be update based on ArrEx)
+
+This class to extension of using Array, by some functions.  
 ArrayExCore is predeclared, and can use like samples.
 
-- ArrayEx : src\ArrayEx.xlsm
+- ArrayEx : ArrayEx
     - ArrayExCore.cls
     - ArrayEx0.cls 
     - ArrayEx1.cls
     - ArrayEx2.cls
-- Sample
 
 ## Features
 - ArrayEx0, 1, 2 has some functions. These can be used like a chain method.
@@ -55,6 +108,3 @@ C#のメソッドチェーンのように書けると嬉しいなぁというア
 - LinqっぽいMethodはいくつかを抜粋して実装しました。
 - 処理が高速というわけではない。
 
-
-いつも夜中に作っていたので、ミスっていたら申し訳ございません...
-I'm sleepy zzZ
