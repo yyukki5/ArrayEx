@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'<dir .\old ver /dir>
 Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
@@ -22,8 +23,8 @@ Private array_ As Variant
 ' Properties -------------------------------------------------------------------------------------------------
 Public Property Get Value(): Value = array_: End Property
 Public Property Let Value(array1d): Init array1d: End Property
-Public Property Get Ub(): Ub = UBound(array_, 1): End Property
-Public Property Get Lb(): Lb = LBound(array_, 1): End Property
+Public Property Get ub(): ub = UBound(array_, 1): End Property
+Public Property Get lb(): lb = LBound(array_, 1): End Property
 Public Property Get Count() As Long: Count = UBound(array_, 1) - LBound(array_, 1) + 1: End Property
 
 
@@ -43,10 +44,10 @@ End Function
 Public Function Equals(arrayEx1d As ArrayEx1) As Boolean
     Equals = False
     Dim array1d: array1d = arrayEx1d.Value
-    If Lb <> LBound(array1d) Then Exit Function
-    If Ub <> UBound(array1d) Then Exit Function
+    If lb <> LBound(array1d) Then Exit Function
+    If ub <> UBound(array1d) Then Exit Function
     Dim i As Long
-    For i = Lb To Ub
+    For i = lb To ub
         If array_(i) <> array1d(i) Then Exit Function
     Next i
     Equals = True
@@ -72,7 +73,7 @@ Public Function AddElement(element As ArrayEx0) As ArrayEx1
     If IsEmpty(array_) Then
         array_ = Array(element.Value)
     Else
-        ReDim Preserve array_(Lb To Ub + 1): array_(Ub) = element.Value
+        ReDim Preserve array_(lb To ub + 1): array_(ub) = element.Value
     End If
     Set AddElement = Me
 End Function
@@ -81,7 +82,7 @@ End Function
 Public Function ToString() As String
     Dim s As String, i As Long, j As Long
     s = "{"
-    For i = Lb To Ub
+    For i = lb To ub
         s = s & CStr(array_(i)) & ","
     Next i
     s = Left(s, Len(s) - 1) & "}"
@@ -93,7 +94,7 @@ Public Function ToCollection() As Collection
     Dim arr As ArrayEx0
     Dim i As Long
     
-    For i = Lb To Ub
+    For i = lb To ub
         Set arr = New ArrayEx0
         coll.Add arr.Init(array_(i))
     Next i
@@ -110,33 +111,33 @@ End Function
 Public Function Contains(element As Variant) As Boolean
     Contains = True
     Dim i As Long
-    For i = Lb To Ub
+    For i = lb To ub
         If array_(i) = element Then Exit Function
     Next i
     Contains = False
 End Function
 
 Public Function First() As ArrayEx0
-    Set First = GetElement(Lb)
+    Set First = GetElement(lb)
 End Function
 
 Public Function Last() As ArrayEx0
-    Set Last = GetElement(Ub)
+    Set Last = GetElement(ub)
 End Function
 
 Public Function Skip(skipIndex As Long) As ArrayEx1
-    Set Skip = ExtractCore(Lb + skipIndex & ":" & Ub)
+    Set Skip = ExtractCore(lb + skipIndex & ":" & ub)
 End Function
 
 Public Function Take(takeIndex As Long) As ArrayEx1
-    Set Take = ExtractCore(Lb & ":" & takeIndex + Lb - 1)
+    Set Take = ExtractCore(lb & ":" & takeIndex + lb - 1)
 End Function
 
 Public Function Distinct() As ArrayEx1
     Dim var As Variant
     Dim i As Long, s As String, sIndexes As String
     Dim coll As New Collection
-    For i = Lb To Ub
+    For i = lb To ub
         If IsDuplicated(coll, array_(i)) Then
         Else
             coll.Add array_(i)
@@ -159,10 +160,10 @@ Public Function OrderByDescending() As ArrayEx1
 End Function
 
 Public Function Reverse() As ArrayEx1
-    Dim rearr: ReDim rearr(Lb To Ub)
+    Dim rearr: ReDim rearr(lb To ub)
     Dim i As Long
-    For i = Lb To Ub
-        rearr(i) = array_(Ub - i + 1)
+    For i = lb To ub
+        rearr(i) = array_(ub - i + 1)
     Next i
     Dim re As New ArrayEx1
     Set Reverse = re.Init(rearr)
@@ -191,7 +192,7 @@ End Function
 Public Function WhereEvaluated(argument As String, formula As String) As ArrayEx1
     Dim evaluations, indexes As String, i As Long
     evaluations = GetEvaluations(argument, formula)
-    For i = Lb To Ub
+    For i = lb To ub
         If VarType(evaluations(i)) <> vbBoolean Then Err.Raise 1101, "ArrayEx1.WhereEvaluated()", "Should evaluated value boolean, but not boolean: " & evaluations(i)
         If evaluations(i) Then indexes = indexes & i & ","
     Next i
@@ -213,7 +214,7 @@ End Function
 
 Public Function DebugPrint(Optional formatString As String = "") As ArrayEx1
     Dim i&, s$
-    For i = Lb To Ub
+    For i = lb To ub
         Debug.Print Format(array_(i), formatString)
     Next i
     Set DebugPrint = Me
@@ -264,8 +265,8 @@ End Function
 
 Private Function GetEvaluations(argument As String, formula As String) As Variant
     Dim i As Long, s As String, rearr, re
-    ReDim rearr(Lb To Ub)
-    For i = Lb To Ub
+    ReDim rearr(lb To ub)
+    For i = lb To ub
         s = Replace(formula, argument, array_(i))
         If ArrayExCore.TryEvaluate(s, re) Then rearr(i) = re _
             Else Err.Raise 1003, "ArrayEx1.GetEvaluations()", "String in evaluate() is error :" & s & "."
