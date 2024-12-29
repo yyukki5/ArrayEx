@@ -140,20 +140,15 @@ Public Function RedimPreserve(array_rank As aexRank, _
         If IsMissing(lower_bound1) = True And IsMissing(upper_bound1) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound1")
     End If
     If array_rank > aexRank1 Then
-        If IsMissing(lower_bound1) = False And IsMissing(upper_bound1) = False Then
-            If IsMissing(lower_bound2) = False And IsMissing(upper_bound2) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound2")
-            If IsMissing(lower_bound2) = True And IsMissing(upper_bound2) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound2")
-        End If
+        If IsMissing(lower_bound2) = False And IsMissing(upper_bound2) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound2")
+        If IsMissing(lower_bound2) = True And IsMissing(upper_bound2) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound2")
     End If
-    If IsMissing(lower_bound1) Then lower_bound1 = 0
-    If IsMissing(upper_bound1) Then upper_bound1 = 0
-    If IsMissing(lower_bound2) Then lower_bound2 = 0
-    If IsMissing(upper_bound2) Then upper_bound2 = 0
     
-    l1 = CLng(lower_bound1)
-    u1 = CLng(upper_bound1)
-    l2 = CLng(lower_bound2)
-    u2 = CLng(upper_bound2)
+    If IsMissing(lower_bound1) Then l1 = lb1_ Else l1 = lower_bound1
+    If IsMissing(upper_bound1) Then u1 = ub1_ Else u1 = upper_bound1
+    If IsMissing(lower_bound2) Then l2 = lb2_ Else l2 = lower_bound2
+    If IsMissing(upper_bound2) Then u2 = ub2_ Else u2 = upper_bound2
+    
     cnt1 = u1 - l1
     cnt2 = u2 - l2
     
@@ -196,15 +191,8 @@ Public Function RedimPreserve(array_rank As aexRank, _
         
         Case 22
             ReDim arr(l1 To u1, l2 To u2)
-            If (ub1_ - lb1_) > cnt1 And (ub2_ - lb2_) > cnt2 Then
-                u1 = cnt1: u2 = cnt2
-            ElseIf (ub1_ - lb1_) > cnt1 And (ub2_ - lb2_) < cnt2 Then
-                u1 = cnt1: u2 = ub2_ - lb2_
-            ElseIf (ub1_ - lb1_) < cnt1 And (ub2_ - lb2_) > cnt2 Then
-                u1 = ub1_ - lb1_: u2 = cnt2
-            ElseIf (ub1_ - lb1_) < cnt1 And (ub2_ - lb2_) < cnt2 Then
-                u1 = ub1_ - lb1_: u2 = ub2_ - lb2_
-            End If
+            u1 = IIf((ub1_ - lb1_) > cnt1, cnt1, ub1_ - lb1_)
+            u2 = IIf((ub2_ - lb2_) > cnt2, cnt2, ub2_ - lb2_)
             
             If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 2, blank_value)
             
@@ -778,6 +766,7 @@ Public Function DebugPrint(Optional column_delimiter As String = ",") As ArrEx
     
     Else
     End If
+    Debug.Print ""
     Set DebugPrint = Me
 End Function
 
