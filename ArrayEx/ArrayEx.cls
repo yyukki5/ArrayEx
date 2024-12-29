@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "ArrEx"
+Attribute VB_Name = "ArrayEx"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -11,8 +11,8 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 0.1.1
-' Dependencies              :
+' Version                   : 3.0.0
+' Dependencies              : Lambda
 ' ------------------------------------------------------------------------------------------------------------
 
 Private Const ERR_NUM_UNSUPPORT_RANK As Long = 9001
@@ -27,43 +27,32 @@ Private ub1_ As Long
 Private lb2_ As Long
 Private ub2_ As Long
 
-Public Enum aexOrientation
-    aexVertical = 1
-    aexHorizontal = 2
+Public Enum ArrayExOrientations
+    ArrayExVertical = 1
+    ArrayExHorizontal = 2
 End Enum
 
-Public Enum aexOperators
-    aexEqual
-    aexIs
-    aexIsNot
-    aexGreaterThan
-    aexGreaterThanOrEqualTo
-    aexLessThan
-    aexLessThanOrEqualTo
+Public Enum ArrayExRanks
+    ArrayExRank0 = 0
+    ArrayExRank1 = 1
+    ArrayExRank2 = 2
 End Enum
 
-Public Enum aexRank
-    aexRank0 = 0
-    aexRank1 = 1
-    aexRank2 = 2
-End Enum
-
-
-Public Function Initialize(ByVal val As Variant) As ArrEx
+Public Function Initialize(ByVal val As Variant) As ArrayEx
     
     value_ = val
-    rank_ = GetRank(val)
+    rank_ = GetRank(value_)
     If rank_ > 0 Then lb1_ = LBound(value_, 1): ub1_ = UBound(value_, 1)
     If rank_ > 1 Then lb2_ = LBound(value_, 2): ub2_ = UBound(value_, 2)
-    If rank_ > 2 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrEx.Initialize()", ERR_DESC_UNSUPPORT_RANK)
+    If rank_ > 2 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrayEx.Initialize()", ERR_DESC_UNSUPPORT_RANK)
     
     Set Initialize = Me
 End Function
 
-Public Function Create(val As Variant) As ArrEx
+Public Function Create(val As Variant) As ArrayEx
 Attribute Create.VB_Description = "Return new instance of ArrEx"
 Attribute Create.VB_UserMemId = 0
-    Set Create = New ArrEx
+    Set Create = New ArrayEx
     Call Create.Initialize(val)
 End Function
 
@@ -90,10 +79,10 @@ Public Function Equals(compared_value As Variant) As Boolean
     Dim i As Long, j As Long, val As Variant
     
     If IsObject(compared_value) Then
-        If TypeName(compared_value) = "ArrEx" Then
+        If TypeName(compared_value) = "ArrayEx" Then
             val = compared_value.Value
         Else
-            Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.Equals()", ERR_DESC_UNSUPPORT_ARGUMENT & " (" & TypeName(compared_value) & ")")
+            Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.Equals()", ERR_DESC_UNSUPPORT_ARGUMENT & " (" & TypeName(compared_value) & ")")
         End If
     Else
         val = compared_value
@@ -123,33 +112,32 @@ Public Function Equals(compared_value As Variant) As Boolean
     Equals = True
 End Function
 
-Public Function RedimPreserve(array_rank As aexRank, _
+Public Function RedimPreserve(array_rank As ArrayExRanks, _
     Optional lower_bound1 As Variant, _
     Optional upper_bound1 As Variant, _
     Optional lower_bound2 As Variant, _
     Optional upper_bound2 As Variant, _
-    Optional blank_value As Variant) As ArrEx
-    
+    Optional blank_value As Variant) As ArrayEx
     Dim i As Long, j As Long, arr, cnt1 As Long, cnt2 As Long, l1 As Long, l2 As Long, u1 As Long, u2 As Long
     
-    If array_rank = aexRank0 Then
-        If (IsMissing(lower_bound1) And IsMissing(upper_bound1) And IsMissing(lower_bound2) And IsMissing(upper_bound2)) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT)
+    If array_rank = ArrayExRank0 Then
+        If (IsMissing(lower_bound1) And IsMissing(upper_bound1) And IsMissing(lower_bound2) And IsMissing(upper_bound2)) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT)
     End If
-    If array_rank > aexRank0 Then
-        If IsMissing(lower_bound1) = False And IsMissing(upper_bound1) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound1")
-        If IsMissing(lower_bound1) = True And IsMissing(upper_bound1) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound1")
+    If array_rank > ArrayExRank0 Then
+        If IsMissing(lower_bound1) = False And IsMissing(upper_bound1) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound1")
+        If IsMissing(lower_bound1) = True And IsMissing(upper_bound1) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound1")
     End If
-    If array_rank > aexRank1 Then
-        If IsMissing(lower_bound2) = False And IsMissing(upper_bound2) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound2")
-        If IsMissing(lower_bound2) = True And IsMissing(upper_bound2) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound2")
+    If array_rank > ArrayExRank1 Then
+        If IsMissing(lower_bound2) = False And IsMissing(upper_bound2) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound2")
+        If IsMissing(lower_bound2) = True And IsMissing(upper_bound2) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound2")
     End If
-    
+        
     If IsMissing(lower_bound1) Then l1 = lb1_ Else l1 = lower_bound1
     If IsMissing(upper_bound1) Then u1 = ub1_ Else u1 = upper_bound1
     If IsMissing(lower_bound2) Then l2 = lb2_ Else l2 = lower_bound2
     If IsMissing(upper_bound2) Then u2 = ub2_ Else u2 = upper_bound2
     
-    If array_rank = aexRank1 Then
+    If array_rank = ArrayExRank1 Then
         If IsMissing(lower_bound1) And IsMissing(upper_bound1) Then l1 = lb2_: u1 = ub2_
     End If
     
@@ -211,12 +199,12 @@ Public Function RedimPreserve(array_rank As aexRank, _
     Set RedimPreserve = Create(arr)
 End Function
 
-Public Function ShiftIndex(add_index1 As Long, Optional add_index2 As Long) As ArrEx
+Public Function ShiftIndex(add_index1 As Long, Optional add_index2 As Long) As ArrayEx
     Dim rearr, i As Long, j As Long
     
-    If rank_ = 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrEx.ShiftIndex()", "Need dimension more 0")
-    If rank_ > 0 Then If lb1_ + add_index1 < 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.ShiftIndex()", "Need add_index1 is 0 or more")
-    If rank_ > 1 Then If lb2_ + add_index2 < 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.ShiftIndex()", "Need add_index2 is 0 or more")
+    If rank_ = 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrayEx.ShiftIndex()", "Need dimension more 0")
+    If rank_ > 0 Then If lb1_ + add_index1 < 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.ShiftIndex()", "Need add_index1 is 0 or more")
+    If rank_ > 1 Then If lb2_ + add_index2 < 0 Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.ShiftIndex()", "Need add_index2 is 0 or more")
 
     If rank_ = 1 Then
         ReDim rearr(lb1_ + add_index1 To ub1_ + add_index1)
@@ -236,7 +224,7 @@ Public Function ShiftIndex(add_index1 As Long, Optional add_index2 As Long) As A
     Set ShiftIndex = Create(rearr)
 End Function
 
-Public Function SelectColumns(ParamArray any_indexes()) As ArrEx
+Public Function SelectColumns(ParamArray any_indexes()) As ArrayEx
     Dim rearr, i As Long, j As Long, col As New Collection, ind As Long, v As Variant, ub1 As Long, ub2 As Long
     
     If IsEmpty(any_indexes) Then Set SelectColumns = Create(Null): Exit Function
@@ -281,7 +269,7 @@ Public Function SelectColumns(ParamArray any_indexes()) As ArrEx
     Set SelectColumns = Create(rearr)
 End Function
 
-Public Function SelectRows(ParamArray row_indexes()) As ArrEx
+Public Function SelectRows(ParamArray row_indexes()) As ArrayEx
     Dim rearr, i As Long, j As Long, col As New Collection, ind As Long, v As Variant, ub1 As Long
     
     If IsEmpty(row_indexes) Then Set SelectRows = Create(Null): Exit Function
@@ -319,9 +307,7 @@ Public Function SelectRows(ParamArray row_indexes()) As ArrEx
 End Function
 
 
-Public Function WhereBy(Optional column_index As Long, _
-                      Optional compare_operator As aexOperators, _
-                      Optional compare_value As Variant) As ArrEx
+Public Function WhereBy(lambda_string As String) As ArrayEx
     Dim col As New Collection, i As Long, j As Long
     
     If rank_ = 0 Then
@@ -329,13 +315,13 @@ Public Function WhereBy(Optional column_index As Long, _
         
     ElseIf rank_ = 1 Then
         For i = lb1_ To ub1_
-            If Compare(value_(i), compare_operator, compare_value) Then Call col.Add(i)
+            If Lambda(value_(i), lambda_string).Evaluate Then Call col.Add(i)
         Next i
         Set WhereBy = SelectColumns(col)
             
     ElseIf rank_ = 2 Then
         For i = lb1_ To ub1_
-            If Compare(value_(i, column_index), compare_operator, compare_value) Then Call col.Add(i)
+            If Lambda(GetRow(value_, i), lambda_string).Evaluate Then Call col.Add(i)
         Next i
         Set WhereBy = SelectRows(col)
 
@@ -343,7 +329,30 @@ Public Function WhereBy(Optional column_index As Long, _
     
 End Function
 
-Public Function Skip(skip_index As Long, Optional column_skip_index As Long = -1) As ArrEx
+Public Function SelectBy(lambda_string As String) As ArrayEx
+    Dim col As New Collection, i As Long, j As Long, re As Variant
+    
+    If rank_ = 0 Then
+        re = Lambda(value_, lambda_string).Evaluate
+        
+    ElseIf rank_ = 1 Then
+        ReDim re(lb1_ To ub1_)
+        For i = lb1_ To ub1_
+            re(i) = Lambda(value_(i), lambda_string).Evaluate
+        Next i
+            
+    ElseIf rank_ = 2 Then
+        ReDim re(lb1_ To ub1_)
+        For i = lb1_ To ub1_
+            re(i) = Lambda(GetRow(value_, i), lambda_string).Evaluate
+        Next i
+
+    End If
+    
+    Set SelectBy = Create(re)
+End Function
+
+Public Function Skip(skip_index As Long, Optional column_skip_index As Long = -1) As ArrayEx
     Dim col As New Collection, col1 As New Collection, i As Long, j As Long, ub1 As Long, ub2 As Long
     
     If rank_ = 0 Then
@@ -366,7 +375,7 @@ Public Function Skip(skip_index As Long, Optional column_skip_index As Long = -1
     
 End Function
 
-Public Function Take(take_index As Long, Optional column_take_index As Long = -1) As ArrEx
+Public Function Take(take_index As Long, Optional column_take_index As Long = -1) As ArrayEx
     Dim col As New Collection, col1 As New Collection, i As Long, j As Long, ub1 As Long, ub2 As Long
     
     If rank_ = 0 Then
@@ -396,29 +405,29 @@ Public Function Take(take_index As Long, Optional column_take_index As Long = -1
 
 End Function
 
-Public Function OrderBy(Optional column_index As Variant) As ArrEx
+Public Function OrderBy(Optional column_index As Variant) As ArrayEx
     If rank_ = 0 Then
         Set OrderBy = Create(value_)
     ElseIf rank_ = 1 Then
         Set OrderBy = Create(Sort1Dim(value_, True))
     ElseIf rank_ = 2 Then
-        If IsMissing(column_index) Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.OrderBy()", "missing column_index")
+        If IsMissing(column_index) Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.OrderBy()", "missing column_index")
         Set OrderBy = Create(Sort2Dim(value_, CLng(column_index), True))
     End If
 End Function
 
-Public Function OrderByDescending(Optional column_index As Long) As ArrEx
+Public Function OrderByDescending(Optional column_index As Long) As ArrayEx
     If rank_ = 0 Then
         Set OrderByDescending = Create(value_)
     ElseIf rank_ = 1 Then
         Set OrderByDescending = Create(Sort1Dim(value_, False))
     ElseIf rank_ = 2 Then
-        If IsMissing(column_index) Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.OrderByDescending()", "missing column_index")
+        If IsMissing(column_index) Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.OrderByDescending()", "missing column_index")
         Set OrderByDescending = Create(Sort2Dim(value_, CLng(column_index), False))
     End If
 End Function
 
-Public Function Distinct() As ArrEx
+Public Function Distinct() As ArrayEx
     Dim i As Long, any_indexes As New Collection, vals As New Collection
     
     If rank_ = 0 Then
@@ -434,7 +443,7 @@ Public Function Distinct() As ArrEx
         Set Distinct = SelectColumns(any_indexes)
             
     ElseIf rank_ = 2 Then
-        Dim aex As New ArrEx
+        Dim aex As New ArrayEx
         For i = lb1_ To ub1_
             Set aex = SelectRows(i)
             If CheckExist(vals, aex) = False Then
@@ -448,10 +457,10 @@ Public Function Distinct() As ArrEx
     
 End Function
 
-Public Function DistinctBy(column_index As Long) As ArrEx
+Public Function DistinctBy(column_index As Long) As ArrayEx
     Dim i As Long, row_indexes As New Collection, vals As New Collection
     
-    If rank_ <> 2 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrEx.DistinctBy()", ERR_DESC_UNSUPPORT_RANK)
+    If rank_ <> 2 Then Call Err.Raise(ERR_NUM_UNSUPPORT_RANK, "ArrayEx.DistinctBy()", ERR_DESC_UNSUPPORT_RANK)
     
     For i = lb1_ To ub1_
         If CheckExist(vals, value_(i, column_index)) = False Then
@@ -463,7 +472,7 @@ Public Function DistinctBy(column_index As Long) As ArrEx
     Set DistinctBy = SelectRows(row_indexes)
 End Function
 
-Public Function Transpose() As ArrEx
+Public Function Transpose() As ArrayEx
     Dim i As Long, j As Long, re As Variant
     
     If rank_ = 0 Then
@@ -487,16 +496,16 @@ Public Function Transpose() As ArrEx
     Set Transpose = Create(re)
 End Function
 
-Public Function VerticalStack(arr As Variant, Optional blank_value As Variant = Null) As ArrEx
-    Set VerticalStack = Create(StackArray(aexVertical, arr, blank_value))
+Public Function VerticalStack(arr As Variant, Optional blank_value As Variant = Null) As ArrayEx
+    Set VerticalStack = Create(StackArray(ArrayExVertical, arr, blank_value))
 End Function
 
-Public Function HorizontalStack(arr As Variant, Optional blank_value As Variant = Null) As ArrEx
-    Set HorizontalStack = Create(StackArray(aexHorizontal, arr, blank_value))
+Public Function HorizontalStack(arr As Variant, Optional blank_value As Variant = Null) As ArrayEx
+    Set HorizontalStack = Create(StackArray(ArrayExHorizontal, arr, blank_value))
 End Function
 
 ' To
-Public Function ConvertElementsTo(var_type As VbVarType) As ArrEx
+Public Function ConvertElementsTo(var_type As VbVarType) As ArrayEx
     Dim a As Variant, value1 As Variant, col As New Collection
     
     If rank_ = 0 Then value1 = Array(value_) Else value1 = value_
@@ -514,14 +523,14 @@ Public Function ConvertElementsTo(var_type As VbVarType) As ArrEx
             Case vbLongLong: Call col.Add(CLngLng(a))
             Case vbSingle: Call col.Add(CSng(a))
             Case vbString:  Call col.Add(CStr(a))
-            Case Else: Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.ConvertElementsTo()", ERR_DESC_UNSUPPORT_ARGUMENT)
+            Case Else: Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.ConvertElementsTo()", ERR_DESC_UNSUPPORT_ARGUMENT)
         End Select
     Next
     
     Set ConvertElementsTo = Create(CollectionToArray(col, rank_))
 End Function
 
-Public Function ToCollection(Optional split_orientation As aexOrientation) As Collection
+Public Function ToCollection(Optional split_orientation As ArrayExOrientations) As Collection
     Dim col As New Collection, a As Variant, value1 As Variant, i As Long
     
     If rank_ = 0 Then value1 = Array(value_) Else value1 = value_
@@ -535,12 +544,12 @@ Public Function ToCollection(Optional split_orientation As aexOrientation) As Co
         If split_orientation = 0 Then
             For Each a In value1:  Call col.Add(a): Next
         
-        ElseIf split_orientation = aexHorizontal Then
+        ElseIf split_orientation = ArrayExHorizontal Then
             For i = lb1_ To ub1_
                 Call col.Add(GetRow(value1, i), CStr(i))
             Next i
     
-        ElseIf split_orientation = aexVertical Then
+        ElseIf split_orientation = ArrayExVertical Then
             For i = lb2_ To ub2_
                 Call col.Add(GetColumn(value1, i), CStr(i))
             Next i
@@ -578,7 +587,7 @@ Public Function ToString(Optional column_delimiter As String = ",", Optional row
 End Function
 
 
-Public Function XLookUp(array_2d As Variant, result_col As Long, find_col As Long, Optional not_found As Variant = Null) As ArrEx
+Public Function XLookUp(array_2d As Variant, result_col As Long, find_col As Long, Optional not_found As Variant = Null) As ArrayEx
     Dim v As Variant, col As New Collection, i As Long, re As Variant
     
     For Each v In value_
@@ -593,7 +602,7 @@ Public Function XLookUp(array_2d As Variant, result_col As Long, find_col As Lon
 End Function
 
 ' Join array
-Public Function InnerJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrEx
+Public Function InnerJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrayEx
     Dim recol As New Collection, ky As Variant, i As Long, j As Long, dict As Object
     
     
@@ -613,7 +622,7 @@ Public Function InnerJoin(arr As Variant, find_index As Long, joined_index As Lo
     Set InnerJoin = Create(CollectedRowArrayToArray(recol))
 End Function
 
-Public Function LeftJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrEx
+Public Function LeftJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrayEx
     Dim recol As New Collection, ky As Variant, i As Long, j As Long, dict As Object, tmp, ub As Long
     
     Set dict = CreateObject("Scripting.Dictionary")
@@ -634,7 +643,7 @@ Public Function LeftJoin(arr As Variant, find_index As Long, joined_index As Lon
     Set LeftJoin = Create(CollectedRowArrayToArray(recol))
 End Function
 
-Public Function FullOuterJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrEx
+Public Function FullOuterJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrayEx
     Dim recol As New Collection, ky As Variant, i As Long, j As Long, dict_l As Object, dict_r As Object, tmp, ub As Long
     
     Set dict_l = CreateObject("Scripting.Dictionary")
@@ -665,7 +674,7 @@ Public Function FullOuterJoin(arr As Variant, find_index As Long, joined_index A
     Set FullOuterJoin = Create(CollectedRowArrayToArray(recol))
 End Function
 
-Public Function CrossJoin(arr As Variant) As ArrEx
+Public Function CrossJoin(arr As Variant) As ArrayEx
     Dim recol As New Collection, i As Long, j As Long
     
     For i = lb1_ To ub1_
@@ -680,7 +689,7 @@ End Function
 
 ' Strings
 ' Do for each element in value_
-Public Function Format(Optional format_text, Optional first_day_of_week As VbDayOfWeek = vbSunday, Optional first_week_of_year As VbFirstWeekOfYear = vbFirstJan1) As ArrEx
+Public Function Format(Optional format_text, Optional first_day_of_week As VbDayOfWeek = vbSunday, Optional first_week_of_year As VbFirstWeekOfYear = vbFirstJan1) As ArrayEx
     Dim a As Variant, col As New Collection
     
     For Each a In value_
@@ -689,7 +698,7 @@ Public Function Format(Optional format_text, Optional first_day_of_week As VbDay
 
     Set Format = Create(CollectionToArray(col, rank_))
 End Function
-Public Function Replace(find_string As String, replace_string As String) As ArrEx
+Public Function Replace(find_string As String, replace_string As String) As ArrayEx
     Dim a As Variant, col As New Collection
     
     For Each a In value_
@@ -698,7 +707,7 @@ Public Function Replace(find_string As String, replace_string As String) As ArrE
 
     Set Replace = Create(CollectionToArray(col, rank_))
 End Function
-Public Function Left(string_length As Long) As ArrEx
+Public Function Left(string_length As Long) As ArrayEx
     Dim a As Variant, col As New Collection
     
     For Each a In value_
@@ -707,7 +716,7 @@ Public Function Left(string_length As Long) As ArrEx
 
     Set Left = Create(CollectionToArray(col, rank_))
 End Function
-Public Function Right(string_length As Long) As ArrEx
+Public Function Right(string_length As Long) As ArrayEx
     Dim a As Variant, col As New Collection
     
     For Each a In value_
@@ -716,7 +725,7 @@ Public Function Right(string_length As Long) As ArrEx
 
     Set Right = Create(CollectionToArray(col, rank_))
 End Function
-Public Function Mid(start_index As Long, Optional length_index) As ArrEx
+Public Function Mid(start_index As Long, Optional length_index) As ArrayEx
     Dim a As Variant, col As New Collection
     
     For Each a In value_
@@ -732,7 +741,7 @@ End Function
 
 
 ' Processing the + operator
-Public Function Plus(val As Variant) As ArrEx
+Public Function Plus(val As Variant) As ArrayEx
     Dim a As Variant, col As New Collection
     
     On Error GoTo errl
@@ -743,12 +752,12 @@ Public Function Plus(val As Variant) As ArrEx
     Set Plus = Create(CollectionToArray(col, rank_))
     Exit Function
 errl:
-    Call Err.Raise(Err.Number, Err.Source & vbCrLf & "at ArrEx.Plus()", Err.Description)
+    Call Err.Raise(Err.Number, Err.Source & vbCrLf & "at ArrayEx.Plus()", Err.Description)
 End Function
 
 
 ' Developing tools
-Public Function DebugPrint(Optional column_delimiter As String = ",") As ArrEx
+Public Function DebugPrint(Optional column_delimiter As String = ",") As ArrayEx
     Dim i As Long, j As Long, txt As String
     If rank_ = 0 Then
         Debug.Print value_
@@ -801,7 +810,7 @@ Private Function Compare(compared_value As Variant, compare_operator As aexOpera
     End If
 End Function
 
-Private Function CollectionToArray(col As Collection, rnk As aexRank, Optional l1 As Long, Optional u1 As Long, Optional l2 As Long, Optional u2 As Long)
+Private Function CollectionToArray(col As Collection, rnk As ArrayExRanks, Optional l1 As Long, Optional u1 As Long, Optional l2 As Long, Optional u2 As Long)
     Dim i As Long, j As Long, arr, cnt
     
     If col.Count = 0 Then CollectionToArray = Array(): Exit Function
@@ -867,19 +876,19 @@ outLoop:
     GetRank = (i - 1)
 End Function
 
-Private Function SetValueToAllElementByRank(arr As Variant, rnk As aexRank, val As Variant) As Variant()
+Private Function SetValueToAllElementByRank(arr As Variant, rnk As ArrayExRanks, val As Variant) As Variant()
     Dim i As Long, j As Long, rearr As Variant
         
-    If rnk = aexRank0 Then
+    If rnk = ArrayExRank0 Then
         arr = val
     
-    ElseIf rnk = aexRank1 Then
+    ElseIf rnk = ArrayExRank1 Then
         ReDim rearr(LBound(arr) To UBound(arr))
         For i = LBound(arr) To UBound(arr)
             rearr(i) = val
         Next i
     
-    ElseIf rnk = aexRank2 Then
+    ElseIf rnk = ArrayExRank2 Then
         ReDim rearr(LBound(arr, 1) To UBound(arr, 1), LBound(arr, 2) To UBound(arr, 2))
         For i = LBound(arr, 1) To UBound(arr, 1)
             For j = LBound(arr, 2) To UBound(arr, 2)
@@ -906,8 +915,8 @@ Private Function SetValueToAllElement(arr As Variant, val As Variant) As Variant
     SetValueToAllElement = rearr
 End Function
 
-Private Function StackArray(d As aexOrientation, arr As Variant, blank_value As Variant) As Variant
-    Dim rearr As Variant, col As New Collection, aex As ArrEx
+Private Function StackArray(d As ArrayExOrientations, arr As Variant, blank_value As Variant) As Variant
+    Dim rearr As Variant, col As New Collection, aex As ArrayEx
     Dim lb1 As Long, ub1 As Long, lb2 As Long, ub2 As Long, cnt As Long, i As Long, j As Long
     
     lb1 = lb1_
@@ -915,7 +924,7 @@ Private Function StackArray(d As aexOrientation, arr As Variant, blank_value As 
     Call col.Add(Me)
     Call col.Add(Create(arr))
         
-    If d = aexVertical Then
+    If d = ArrayExVertical Then
         
         ' get max/min index
         lb1 = lb1_
@@ -962,7 +971,7 @@ Private Function StackArray(d As aexOrientation, arr As Variant, blank_value As 
             End If
         Next
     
-    ElseIf d = aexHorizontal Then
+    ElseIf d = ArrayExHorizontal Then
         
         ' get max/min index
         lb2 = lb2_

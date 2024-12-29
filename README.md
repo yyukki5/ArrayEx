@@ -46,49 +46,31 @@ PredeclaredでCreate()をデフォルトにしているので短い記述で使�
 Initialize() 以外のSetter が無いImmutable な実装にしています。  
 
 
-
-
-
-
 # ArrayEx
-(Old design, To be update based on ArrEx)
+(Old design, To be moved to old ver/)
 
 This class to extension of using Array, by some functions.  
-ArrayExCore is predeclared, and can use like samples.
+Some functions using Lambda
 
-- ArrayEx : ArrayEx
-    - ArrayExCore.cls
-    - ArrayEx0.cls 
-    - ArrayEx1.cls
-    - ArrayEx2.cls
+## Dependency classes
+- Lambda.cls (<- see [Lambda Repository](https://github.com/yyukki5/Lambda))
 
 ## Features
-- ArrayEx0, 1, 2 has some functions. These can be used like a chain method.
-- ArrayEx1,2 has *Evaluated() methods. These used Evaluate() method instead of delegate.
-- ArrayEx1,2 has Extract() and more methods. There use index as array, collection string (like a "1,2,3". "1 to 3", "1:3", ":")
-- ArrayEx2 is depend on ArrayEx1,0, Core. 
-- ArrayEx1 is depend on ArrayEx0, Core. 
-- ArrayEx0 is depend on ArrayExCore.
-- ArrayExCore is independent.
-- ArrayExCore has some new excel functions like (VSTACK, HSTACK, CHOOSEROW, CHOOSECOLUMN, EXPAND, TEXTSPLIT, ...)
+Some functions using Lambda
+- WhereBy()
+- SelectBy() : Using lambda function for (1 dim -> each element, 2 dim -> each row)
 
 
 ## Sample Code
 ~~~
-Dim rearr
-rearr = ArrayExCore.HSTACK([{1,2,3,}], [{4,5,6}])
-
-Dim arr As New ArrayEx2
-Call arr.Init(Range("A1:E3").Value) _
-    .DebugPrintAll _
-    .Extract("1:2", "3:5") _
-    .WhereEvaluated("x", 1, "x>1") _
-    .DebugPrintAll _
-    .GetRow(2) _
-    .DebugPrintAll _
-    .SetElement(1, 11) _
-    .DebugPrintAll _
-    .ToRange(Range("A5"))
+Call ArrayEx(array2d) _
+    .DebugPrint("," & vbTab) _
+    .WhereBy("x => x(1) > 2") _
+    .DebugPrint("," & vbTab) _
+    .SelectBy("x=>x(2) + x(3)") _
+    .DebugPrint("," & vbTab) _
+    .OrderByDescending _
+    .DebugPrint("," & vbTab)
 ~~~
 
 ## Note
@@ -99,12 +81,7 @@ C#のメソッドチェーンのように書けると嬉しいなぁというア
 作っているうちに気が付きましたが、インターネットを探すと素晴らしい先人の作品が既にありました...  
 ただし、これは趣味のプログラムなので、なにかが優れているということは求めていません...  
 
-- Rangeから値を取得して、配列として処理して、Rangeに値を代入することを主に想定しています。
-- Whereなどではインスタンスをコピーして返します。
-- 配列の次元ごとにインテリセンスで表示される内容を分けたかったので、クラスも次元毎に分けました。
-- ArrayExCoreは単独で使用可能。ArrayEx0,1,2はArrayExCoreに依存します。
-- ArrayEx1 はArrayEx0 に依存。ArrayEx2 はArrayEx0, ArrayEx1 に依存します。
-- MATLABっぽい感じで要素を指定できると個人的に嬉しいので、":"、また "To" でGet出来るようにしました。
+- ArrayEx0,1,2,Coreは old ver に移動
 - LinqっぽいMethodはいくつかを抜粋して実装しました。
-- 処理が高速というわけではない。
+- Lambdaを使っている部分はすこし処理に時間が掛かるので注意。
 
