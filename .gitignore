@@ -23,6 +23,7 @@ vbac.wsf
 UnitTest.cls
 UnitTests.bas
 DevTools.cls
+Lambda.cls
 
 # User-specific files
 *.rsuser
