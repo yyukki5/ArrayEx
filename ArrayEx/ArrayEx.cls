@@ -27,27 +27,6 @@ Private ub1_ As Long
 Private lb2_ As Long
 Private ub2_ As Long
 
-Public Enum aexOrientation
-    aexVertical = 1
-    aexHorizontal = 2
-End Enum
-
-Public Enum aexOperators
-    aexEqual
-    aexIs
-    aexIsNot
-    aexGreaterThan
-    aexGreaterThanOrEqualTo
-    aexLessThan
-    aexLessThanOrEqualTo
-End Enum
-
-Public Enum aexRank
-    aexRank0 = 0
-    aexRank1 = 1
-    aexRank2 = 2
-End Enum
-
 Public Function Initialize(ByVal val As Variant) As ArrayEx
     
     value_ = val
