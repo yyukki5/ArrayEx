@@ -834,14 +834,14 @@ Private Function CollectedRowArrayToArray(col As Collection)
     Dim i As Long, j As Long, a As Variant, cnt As Long, re As Variant, ub1 As Long, ub2 As Long
     
     ub1 = lb1_ + col.Count - 1
-    ub2 = lb2_ + UBound(col(1))
+    ub2 = lb2_ + (UBound(col(1)) - LBound(col(1)))
     ReDim re(lb1_ To ub1, lb2_ To ub2)
     
     i = lb1_ - 1
     For Each a In col
         i = i + 1
         For j = lb2_ To ub2
-            re(i, j) = a(j - lb2_)
+            re(i, j) = a((j - lb2_) + LBound(a))
         Next j
     Next
         
