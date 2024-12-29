@@ -131,11 +131,15 @@ Public Function RedimPreserve(array_rank As ArrayExRanks, _
         If IsMissing(lower_bound2) = False And IsMissing(upper_bound2) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound2")
         If IsMissing(lower_bound2) = True And IsMissing(upper_bound2) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrayEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound2")
     End If
-    
+        
     If IsMissing(lower_bound1) Then l1 = lb1_ Else l1 = lower_bound1
     If IsMissing(upper_bound1) Then u1 = ub1_ Else u1 = upper_bound1
     If IsMissing(lower_bound2) Then l2 = lb2_ Else l2 = lower_bound2
     If IsMissing(upper_bound2) Then u2 = ub2_ Else u2 = upper_bound2
+    
+    If array_rank = ArrayExRank1 Then
+        If IsMissing(lower_bound1) And IsMissing(upper_bound1) Then l1 = lb2_: u1 = ub2_
+    End If
     
     cnt1 = u1 - l1
     cnt2 = u2 - l2
@@ -172,10 +176,10 @@ Public Function RedimPreserve(array_rank As ArrayExRanks, _
             arr = value_(lb1_, lb2_)
         
         Case 21
-            ReDim arr(l2 To u2)
-            u2 = IIf(ub2_ - lb2_ > cnt2, cnt2, ub2_ - lb2_)
+            ReDim arr(l1 To u1)
+            u1 = IIf(ub2_ - lb2_ > cnt1, cnt1, ub2_ - lb2_)
             If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 1, blank_value)
-            For i = 0 To u2: arr(l2 + i) = value_(lb1_, lb2_ + i):  Next i
+            For i = 0 To u1: arr(l1 + i) = value_(lb1_, lb2_ + i):  Next i
         
         Case 22
             ReDim arr(l1 To u1, l2 To u2)

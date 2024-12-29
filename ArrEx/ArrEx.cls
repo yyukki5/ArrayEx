@@ -149,6 +149,10 @@ Public Function RedimPreserve(array_rank As aexRank, _
     If IsMissing(lower_bound2) Then l2 = lb2_ Else l2 = lower_bound2
     If IsMissing(upper_bound2) Then u2 = ub2_ Else u2 = upper_bound2
     
+    If array_rank = aexRank1 Then
+        If IsMissing(lower_bound1) And IsMissing(upper_bound1) Then l1 = lb2_: u1 = ub2_
+    End If
+    
     cnt1 = u1 - l1
     cnt2 = u2 - l2
     
