@@ -1059,7 +1059,7 @@ Private Function JoinArrays(arr1 As Variant, arr2 As Variant) As Variant
     JoinArrays = res
 End Function
 
-Function CreateNullArray(lb As Long, ub As Long) As Variant
+Private Function CreateNullArray(lb As Long, ub As Long) As Variant
     Dim arr() As Variant, i As Long
     
     ReDim arr(lb To ub)
@@ -1069,7 +1069,6 @@ Function CreateNullArray(lb As Long, ub As Long) As Variant
     
     CreateNullArray = arr
 End Function
-
 
 Private Function GetRow(arr, ind)
     Dim re, i As Long
