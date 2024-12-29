@@ -9,8 +9,10 @@
 bin/*
 bin/old/
 bin/backup/
-src/*.accdb/*
-src/*.docm/*
+*.xlsm
+*.xlsx
+*.accdb
+*.docm
 vbac.wsf
 *.doccls
 *.bat
@@ -20,7 +22,9 @@ vbac.wsf
 # remove files for release
 UnitTest.cls
 UnitTests.bas
-
+DevTools.cls
+ArrayEx/Lambda.cls
+ArrayEx/ArrEx.cls
 
 # User-specific files
 *.rsuser

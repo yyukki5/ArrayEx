@@ -7,11 +7,12 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+'<dir .\old ver /dir>
 Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 2.3.0
+' Version                   : 2.1.0
 ' Dependencies              : ArrayExCore.cls
 ' ------------------------------------------------------------------------------------------------------------
 
@@ -88,14 +89,14 @@ End Function
 Public Function Concat(text As String) As ArrayEx0
     Dim rearr As New ArrayEx0:    Set Concat = rearr.Init(array_ & text)
 End Function
-Public Function InStr(Optional start, Optional string2, Optional compare As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As ArrayEx0
-    Dim rearr As New ArrayEx0:    Set InStr = rearr.Init(Strings.InStr(IIf(IsNumeric(start), start, 1), array_, IIf(IsNumeric(start), string2, start), compare))
+Public Function InStr(Optional start, Optional string2, Optional Compare As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set InStr = rearr.Init(Strings.InStr(IIf(IsNumeric(start), start, 1), array_, IIf(IsNumeric(start), string2, start), Compare))
 End Function
-Public Function InStrRev(stringmatch, Optional start As Long = -1, Optional compare As VbCompareMethod = vbBinaryCompare) As ArrayEx0
-    Dim rearr As New ArrayEx0:    Set InStrRev = rearr.Init(Strings.InStrRev(array_, stringmatch, start, compare))
+Public Function InStrRev(stringmatch, Optional start As Long = -1, Optional Compare As VbCompareMethod = vbBinaryCompare) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set InStrRev = rearr.Init(Strings.InStrRev(array_, stringmatch, start, Compare))
 End Function
-Public Function StrComp(str, Optional compare As VbCompareMethod = vbBinaryCompare) As ArrayEx0
-    Dim rearr As New ArrayEx0:    Set StrComp = rearr.Init(Strings.StrComp(array_, str, compare))
+Public Function StrComp(str, Optional Compare As VbCompareMethod = vbBinaryCompare) As ArrayEx0
+    Dim rearr As New ArrayEx0:    Set StrComp = rearr.Init(Strings.StrComp(array_, str, Compare))
 End Function
 Public Function StrConv(Conversion As VbStrConv) As ArrayEx0
     Dim rearr As New ArrayEx0:    Set StrConv = rearr.Init(Strings.StrConv(array_, Conversion))
