@@ -15,12 +15,9 @@ Option Explicit
 ' Dependencies              :
 ' ------------------------------------------------------------------------------------------------------------
 
-' Note
-'‘±‚«‚Í¤Œ©’¼‚µ‚©‚ç
-
 Private Const ERR_NUM_UNSUPPORT_RANK As Long = 9001
 Private Const ERR_NUM_UNSUPPORT_ARGUMENT As Long = 9002
-Private Const ERR_DESC_UNSUPPORT_RANK As String = "unsupported rank"
+Private Const ERR_DESC_UNSUPPORT_RANK As String = "unsupported array rank"
 Private Const ERR_DESC_UNSUPPORT_ARGUMENT As String = "unsupported argument"
 
 Private value_ As Variant
@@ -126,41 +123,79 @@ Public Function Equals(compared_value As Variant) As Boolean
     Equals = True
 End Function
 
-Public Function RedimPreserve(rnk As aexRank, Optional lb1 As Long, Optional ub1 As Long, Optional lb2 As Long, Optional ub2 As Long) As ArrEx
-    Dim i As Long, j As Long, arr, cnt1 As Long, cnt2 As Long, u1 As Long, u2 As Long
+Public Function RedimPreserve(array_rank As aexRank, _
+    Optional lower_bound1 As Variant, _
+    Optional upper_bound1 As Variant, _
+    Optional lower_bound2 As Variant, _
+    Optional upper_bound2 As Variant, _
+    Optional blank_value As Variant) As ArrEx
     
-    cnt1 = ub1 - lb1
-    cnt2 = ub2 - lb2
-    If cnt1 = 0 And cnt2 = 0 Then
-    ElseIf cnt2 = 0 Then
-    Else
+    Dim i As Long, j As Long, arr, cnt1 As Long, cnt2 As Long, l1 As Long, l2 As Long, u1 As Long, u2 As Long
+    
+    If array_rank = aexRank0 Then
+        If (IsMissing(lower_bound1) And IsMissing(upper_bound1) And IsMissing(lower_bound2) And IsMissing(upper_bound2)) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT)
     End If
+    If array_rank > aexRank0 Then
+        If IsMissing(lower_bound1) = False And IsMissing(upper_bound1) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound1")
+        If IsMissing(lower_bound1) = True And IsMissing(upper_bound1) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound1")
+    End If
+    If array_rank > aexRank1 Then
+        If IsMissing(lower_bound1) = False And IsMissing(upper_bound1) = False Then
+            If IsMissing(lower_bound2) = False And IsMissing(upper_bound2) = True Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing upper_bound2")
+            If IsMissing(lower_bound2) = True And IsMissing(upper_bound2) = False Then Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.RedimPreserve()", ERR_DESC_UNSUPPORT_ARGUMENT & vbCrLf & "missing lower_bound2")
+        End If
+    End If
+    If IsMissing(lower_bound1) Then lower_bound1 = 0
+    If IsMissing(upper_bound1) Then upper_bound1 = 0
+    If IsMissing(lower_bound2) Then lower_bound2 = 0
+    If IsMissing(upper_bound2) Then upper_bound2 = 0
     
-    Select Case (rank_ * 10 + rnk)
+    l1 = CLng(lower_bound1)
+    u1 = CLng(upper_bound1)
+    l2 = CLng(lower_bound2)
+    u2 = CLng(upper_bound2)
+    cnt1 = u1 - l1
+    cnt2 = u2 - l2
+    
+    Select Case (rank_ * 10 + array_rank)
         Case 0
             arr = value_
         Case 1
-            ReDim arr(lb1 To ub1): arr(lb1) = value_
+            ReDim arr(l1 To u1)
+            If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 1, blank_value)
+            arr(l1) = value_
+        
         Case 2
-            ReDim arr(lb1 To ub1, lb2 To ub2): arr(lb1, lb2) = value_
+            ReDim arr(l1 To u1, l2 To u2)
+            If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 2, blank_value)
+            arr(l1, l2) = value_
+        
         Case 10
             arr = value_(lb1_)
+        
         Case 11
-            ReDim arr(lb1 To ub1)
-            u1 = IIf(ub1_ - lb1_ > cnt1, cnt1, ub1_ - lb1_)
-            For i = 0 To u1: arr(lb1 + i) = value_(lb1_ + i):  Next i
+            ReDim arr(l1 To u1)
+            u1 = IIf((ub1_ - lb1_ > cnt1), cnt1, ub1_ - lb1_)
+            If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 1, blank_value)
+            For i = 0 To u1: arr(l1 + i) = value_(lb1_ + i):  Next i
+        
         Case 12
-            ReDim arr(lb1 To ub1, lb2 To ub2)
-            u1 = IIf((ub2_ - lb2_) > cnt1, cnt1, ub2_ - lb2_)
-            For i = 0 To u1: arr(lb1, lb2 + i) = value_(lb1_ + i): Next i
+            ReDim arr(l1 To u1, l2 To u2)
+            u2 = IIf((ub1_ - lb1_) > cnt2, cnt2, ub1_ - lb1_)
+            If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 2, blank_value)
+            For i = 0 To u2:    arr(l1, l2 + i) = value_(lb1_ + i): Next i
+        
         Case 20
             arr = value_(lb1_, lb2_)
+        
         Case 21
-            ReDim arr(lb1 To ub1)
+            ReDim arr(l1 To u1)
             u1 = IIf(ub2_ - lb2_ > cnt1, cnt1, ub2_ - lb2_)
-            For i = 0 To u1: arr(lb1 + i) = value_(lb1_, lb2_ + i):  Next i
+            If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 1, blank_value)
+            For i = 0 To u1: arr(l1 + i) = value_(lb1_, lb2_ + i):  Next i
+        
         Case 22
-            ReDim arr(lb1 To ub1, lb2 To ub2)
+            ReDim arr(l1 To u1, l2 To u2)
             If (ub1_ - lb1_) > cnt1 And (ub2_ - lb2_) > cnt2 Then
                 u1 = cnt1: u2 = cnt2
             ElseIf (ub1_ - lb1_) > cnt1 And (ub2_ - lb2_) < cnt2 Then
@@ -170,11 +205,15 @@ Public Function RedimPreserve(rnk As aexRank, Optional lb1 As Long, Optional ub1
             ElseIf (ub1_ - lb1_) < cnt1 And (ub2_ - lb2_) < cnt2 Then
                 u1 = ub1_ - lb1_: u2 = ub2_ - lb2_
             End If
+            
+            If IsMissing(blank_value) = False Then arr = SetValueToAllElementByRank(arr, 2, blank_value)
+            
             For i = 0 To u1
                 For j = 0 To u2
-                    arr(lb1 + i, lb2 + j) = value_(lb1_ + i, lb2_ + j)
+                    arr(l1 + i, l2 + j) = value_(lb1_ + i, lb2_ + j)
                 Next j
             Next i
+    
     End Select
 
     Set RedimPreserve = Create(arr)
@@ -603,10 +642,6 @@ Public Function LeftJoin(arr As Variant, find_index As Long, joined_index As Lon
     Set LeftJoin = Create(CollectedRowArrayToArray(recol))
 End Function
 
-'Public Function RightJoin(find_index As Long, arr As Variant, joined_index As Long) As ArrEx
-'
-'End Function
-
 Public Function FullOuterJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrEx
     Dim recol As New Collection, ky As Variant, i As Long, j As Long, dict_l As Object, dict_r As Object, tmp, ub As Long
     
@@ -652,7 +687,7 @@ End Function
 
 
 ' Strings
-' value_ “à‘S‚Ä‚Ì—v‘f‚É‘Î‚µ‚Ä
+' Do for each element in value_
 Public Function Format(Optional format_text, Optional first_day_of_week As VbDayOfWeek = vbSunday, Optional first_week_of_year As VbFirstWeekOfYear = vbFirstJan1) As ArrEx
     Dim a As Variant, col As New Collection
     
@@ -703,7 +738,8 @@ Public Function Mid(start_index As Long, Optional length_index) As ArrEx
     Set Mid = Create(CollectionToArray(col, rank_))
 End Function
 
-' {@‰‰Zq‚Ìˆ—‚ğ‚·‚é
+
+' Processing the + operator
 Public Function Plus(val As Variant) As ArrEx
     Dim a As Variant, col As New Collection
     
@@ -719,7 +755,7 @@ errl:
 End Function
 
 
-
+' Developing tools
 Public Function DebugPrint(Optional column_delimiter As String = ",") As ArrEx
     Dim i As Long, j As Long, txt As String
     If rank_ = 0 Then
@@ -838,6 +874,31 @@ outLoop:
     Err.Clear
     GetRank = (i - 1)
 End Function
+
+Private Function SetValueToAllElementByRank(arr As Variant, rnk As aexRank, val As Variant) As Variant()
+    Dim i As Long, j As Long, rearr As Variant
+        
+    If rnk = aexRank0 Then
+        arr = val
+    
+    ElseIf rnk = aexRank1 Then
+        ReDim rearr(LBound(arr) To UBound(arr))
+        For i = LBound(arr) To UBound(arr)
+            rearr(i) = val
+        Next i
+    
+    ElseIf rnk = aexRank2 Then
+        ReDim rearr(LBound(arr, 1) To UBound(arr, 1), LBound(arr, 2) To UBound(arr, 2))
+        For i = LBound(arr, 1) To UBound(arr, 1)
+            For j = LBound(arr, 2) To UBound(arr, 2)
+                rearr(i, j) = val
+            Next j
+        Next i
+    End If
+
+    SetValueToAllElementByRank = rearr
+End Function
+
 
 Private Function SetValueToAllElement(arr As Variant, val As Variant) As Variant()
     Dim i As Long, j As Long, rearr
