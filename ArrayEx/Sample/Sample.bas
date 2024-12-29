@@ -4,21 +4,14 @@ Option Explicit
 
 Sub Sample()
 
-    Dim ar, rearr
-    ar = array2d
-    rearr = ArrayExCore.HSTACK(ar, ar)
-
-    Dim arr As New ArrayEx2
-    Call arr.Init(rearr) _
-        .DebugPrintAll _
-        .Extract("1:3", ":") _
-        .WhereEvaluated("x", 1, "x>1") _
-        .DebugPrintAll _
-        .GetRow(1) _
-        .DebugPrintAll _
-        .OrderByAscending _
-        .SetElement(1, 11) _
-        .DebugPrintAll
+    Call ArrayEx(array2d) _
+        .DebugPrint("," & vbTab) _
+        .WhereBy("x => x(1) > 2") _
+        .DebugPrint("," & vbTab) _
+        .SelectBy("x=>x(2) + x(3)") _
+        .DebugPrint("," & vbTab) _
+        .OrderByDescending _
+        .DebugPrint("," & vbTab)
 
 End Sub
 
