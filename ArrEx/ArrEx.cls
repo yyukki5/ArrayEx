@@ -547,7 +547,7 @@ Public Function HorizontalStack(arr As Variant, Optional blank_value As Variant 
 End Function
 
 ' To
-Public Function ConvertElementsTo(var_type As VbVarType) As ArrEx
+Public Function Cast(var_type As VbVarType) As ArrEx
     Dim a As Variant, value1 As Variant, col As New Collection
     
     If rank_ = 0 Then value1 = Array(value_) Else value1 = value_
@@ -565,11 +565,11 @@ Public Function ConvertElementsTo(var_type As VbVarType) As ArrEx
             Case vbLongLong: Call col.Add(CLngLng(a))
             Case vbSingle: Call col.Add(CSng(a))
             Case vbString:  Call col.Add(CStr(a))
-            Case Else: Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.ConvertElementsTo()", ERR_DESC_UNSUPPORT_ARGUMENT)
+            Case Else: Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.Cast()", ERR_DESC_UNSUPPORT_ARGUMENT)
         End Select
     Next
     
-    Set ConvertElementsTo = Create(CollectionToArray(col, rank_))
+    Set Cast = Create(CollectionToArray(col, rank_))
 End Function
 
 Public Function ToCollection(Optional split_orientation As aexOrientation) As Collection
