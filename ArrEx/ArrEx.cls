@@ -11,7 +11,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 0.1.1
+' Version                   : 0.2.0
 ' Dependencies              :
 ' ------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +34,7 @@ End Enum
 
 Public Enum aexOperators
     aexEqual
+    aexDoesNotEqual
     aexIs
     aexIsNot
     aexGreaterThan
@@ -784,6 +785,8 @@ Private Function Compare(compared_value As Variant, compare_operator As aexOpera
         Select Case compare_operator
             Case aexEqual
                 Compare = (compare_value = compared_value)
+            Case aexDoesNotEqual
+                Compare = (compare_value <> compared_value)
             Case aexGreaterThan
                 Compare = (compared_value > compare_value)
             Case aexGreaterThanOrEqualTo
