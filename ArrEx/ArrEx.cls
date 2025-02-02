@@ -319,6 +319,33 @@ Public Function SelectRows(ParamArray row_indexes()) As ArrEx
     Set SelectRows = Create(rearr)
 End Function
 
+Public Function SelectColumn(column_index As Long) As ArrEx
+    Dim rearr
+    
+    If rank_ <> 2 Then
+        rearr = value_
+      
+    Else
+        rearr = GetColumn(value_, column_index)
+    
+    End If
+        
+    Set SelectColumn = Create(rearr)
+End Function
+
+Public Function SelectRow(row_index As Long) As ArrEx
+    Dim rearr
+    
+    If rank_ <> 2 Then
+        rearr = value_
+      
+    Else
+        rearr = GetRow(value_, row_index)
+    
+    End If
+        
+    Set SelectRow = Create(rearr)
+End Function
 
 Public Function WhereBy(Optional column_index As Long, _
                       Optional compare_operator As aexOperators, _
