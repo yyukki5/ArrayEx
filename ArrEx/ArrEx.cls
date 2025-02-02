@@ -344,6 +344,29 @@ Public Function WhereBy(Optional column_index As Long, _
     
 End Function
 
+Public Function FindIndex(Optional column_index As Long, _
+                      Optional compare_operator As aexOperators, _
+                      Optional compare_value As Variant) As Long
+    Dim i As Long, j As Long
+    
+    If rank_ = 0 Then
+        FindIndex = 0
+        
+    ElseIf rank_ = 1 Then
+        For i = lb1_ To ub1_
+            If Compare(value_(i), compare_operator, compare_value) Then FindIndex = i: Exit Function
+        Next i
+            
+    ElseIf rank_ = 2 Then
+        For i = lb1_ To ub1_
+            If Compare(value_(i, column_index), compare_operator, compare_value) Then FindIndex = i: Exit Function
+        Next i
+        
+    End If
+
+    FindIndex = -1
+End Function
+
 Public Function Skip(skip_index As Long, Optional column_skip_index As Long = -1) As ArrEx
     Dim col As New Collection, col1 As New Collection, i As Long, j As Long, ub1 As Long, ub2 As Long
     
@@ -592,6 +615,8 @@ Public Function XLookUp(array_2d As Variant, result_col As Long, find_col As Lon
     
     Set XLookUp = Create(CollectionToArray(col, rank_))
 End Function
+
+
 
 ' Join array
 Public Function InnerJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrEx
