@@ -11,7 +11,7 @@ Option Explicit
 
 ' ------------------------------------------------------------------------------------------------------------
 ' Project                   : https://github.com/yyukki5/ArrayEx
-' Version                   : 0.1.1
+' Version                   : 0.2.0
 ' Dependencies              :
 ' ------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +34,7 @@ End Enum
 
 Public Enum aexOperators
     aexEqual
+    aexDoesNotEqual
     aexIs
     aexIsNot
     aexGreaterThan
@@ -318,6 +319,33 @@ Public Function SelectRows(ParamArray row_indexes()) As ArrEx
     Set SelectRows = Create(rearr)
 End Function
 
+Public Function SelectColumn(column_index As Long) As ArrEx
+    Dim rearr
+    
+    If rank_ <> 2 Then
+        rearr = value_
+      
+    Else
+        rearr = GetColumn(value_, column_index)
+    
+    End If
+        
+    Set SelectColumn = Create(rearr)
+End Function
+
+Public Function SelectRow(row_index As Long) As ArrEx
+    Dim rearr
+    
+    If rank_ <> 2 Then
+        rearr = value_
+      
+    Else
+        rearr = GetRow(value_, row_index)
+    
+    End If
+        
+    Set SelectRow = Create(rearr)
+End Function
 
 Public Function WhereBy(Optional column_index As Long, _
                       Optional compare_operator As aexOperators, _
@@ -341,6 +369,29 @@ Public Function WhereBy(Optional column_index As Long, _
 
     End If
     
+End Function
+
+Public Function FindIndex(Optional column_index As Long, _
+                      Optional compare_operator As aexOperators, _
+                      Optional compare_value As Variant) As Long
+    Dim i As Long, j As Long
+    
+    If rank_ = 0 Then
+        FindIndex = 0
+        
+    ElseIf rank_ = 1 Then
+        For i = lb1_ To ub1_
+            If Compare(value_(i), compare_operator, compare_value) Then FindIndex = i: Exit Function
+        Next i
+            
+    ElseIf rank_ = 2 Then
+        For i = lb1_ To ub1_
+            If Compare(value_(i, column_index), compare_operator, compare_value) Then FindIndex = i: Exit Function
+        Next i
+        
+    End If
+
+    FindIndex = -1
 End Function
 
 Public Function Skip(skip_index As Long, Optional column_skip_index As Long = -1) As ArrEx
@@ -496,7 +547,7 @@ Public Function HorizontalStack(arr As Variant, Optional blank_value As Variant 
 End Function
 
 ' To
-Public Function ConvertElementsTo(var_type As VbVarType) As ArrEx
+Public Function Cast(var_type As VbVarType) As ArrEx
     Dim a As Variant, value1 As Variant, col As New Collection
     
     If rank_ = 0 Then value1 = Array(value_) Else value1 = value_
@@ -514,11 +565,11 @@ Public Function ConvertElementsTo(var_type As VbVarType) As ArrEx
             Case vbLongLong: Call col.Add(CLngLng(a))
             Case vbSingle: Call col.Add(CSng(a))
             Case vbString:  Call col.Add(CStr(a))
-            Case Else: Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.ConvertElementsTo()", ERR_DESC_UNSUPPORT_ARGUMENT)
+            Case Else: Call Err.Raise(ERR_NUM_UNSUPPORT_ARGUMENT, "ArrEx.Cast()", ERR_DESC_UNSUPPORT_ARGUMENT)
         End Select
     Next
     
-    Set ConvertElementsTo = Create(CollectionToArray(col, rank_))
+    Set Cast = Create(CollectionToArray(col, rank_))
 End Function
 
 Public Function ToCollection(Optional split_orientation As aexOrientation) As Collection
@@ -591,6 +642,8 @@ Public Function XLookUp(array_2d As Variant, result_col As Long, find_col As Lon
     
     Set XLookUp = Create(CollectionToArray(col, rank_))
 End Function
+
+
 
 ' Join array
 Public Function InnerJoin(arr As Variant, find_index As Long, joined_index As Long) As ArrEx
@@ -784,6 +837,8 @@ Private Function Compare(compared_value As Variant, compare_operator As aexOpera
         Select Case compare_operator
             Case aexEqual
                 Compare = (compare_value = compared_value)
+            Case aexDoesNotEqual
+                Compare = (compare_value <> compared_value)
             Case aexGreaterThan
                 Compare = (compared_value > compare_value)
             Case aexGreaterThanOrEqualTo
